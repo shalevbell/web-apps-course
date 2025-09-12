@@ -4,7 +4,7 @@ body {
     font-family: 'Helvetica Neue', Helvetica;
 }
 .login-box-bg {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.9)), url('../images/netflix_assets/netflix_background.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.9)), url('../_images/netflix_assets/netflix_background.jpg');
     background-size: cover;
     background-position: center;
     min-height: 100vh;
