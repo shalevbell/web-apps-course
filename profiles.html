@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix - Who's Watching?</title>
+    <link rel="shortcut icon" href="./images/netflix_assets/netflix_favicon.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #141414;
+            color: #fff;
+            font-family: 'Helvetica Neue', Helvetica;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .netflix-logo {
+            height: 70px;
+            margin-bottom: 10px;
+        }
+        .profiles-container {
+            text-align: center;
+            max-width: 85%;
+            margin: 0 auto;
+        }
+        .profiles-title {
+            font-size: 3.0vw;
+            color: #fff;
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+        .profiles-list {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 2vw;
+            margin-bottom: 40px;
+        }
+        .profile {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 10vw;
+            min-width: 84px;
+            max-width: 200px;
+        }
+        .profile:hover {
+            transform: scale(1.1);
+        }
+        .profile:hover .profile-name {
+            color: white;
+        }
+        .profile-pic {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .profile-name {
+            color: #707070;
+            font-size: max(12px, 1.3vw);
+            transition: color 0.3s ease;
+        }
+        .btn-manage-profiles {
+            background-color: transparent;
+            color: #808080;
+            border: 1px solid #808080;
+            padding: 8px 24px;
+            font-size: max(12px, 1.2vw);
+            letter-spacing: 2px;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        .btn-manage-profiles:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 text-center mb-5">
+                <img src="./images/netflix_assets/netflix_logo.png" alt="Netflix logo" class="netflix-logo">
+            </div>
+        </div>
+        <div class="profiles-container">
+            <h1 class="profiles-title">Who's watching?</h1>
+            <div class="profiles-list">
+                <div class="profile">
+                    <a href="feed.html">
+                        <img src="./images/profile/profile_pic_1.png" alt="Profile 1" class="profile-pic">
+                        <div class="profile-name">Adi</div>
+                    </a>
+                </div>
+                <div class="profile">
+                    <a href="feed.html">
+                        <img src="./images/profile/profile_pic_2.png" alt="Profile 2" class="profile-pic">
+                        <div class="profile-name">Shalev</div>
+                    </a>
+                </div>
+                <div class="profile">
+                    <a href="feed.html">
+                        <img src="./images/profile/profile_pic_3.png" alt="Profile 3" class="profile-pic">
+                        <div class="profile-name">Jonathan</div>
+                    </a>
+                </div>
+                <div class="profile">
+                    <a href="feed.html">
+                        <img src="./images/profile/profile_pic_4.png" alt="Profile 4" class="profile-pic">
+                        <div class="profile-name">Paul</div>
+                    </a>
+                </div>
+            </div>
+            <div class="text-center">
+                <button class="btn btn-manage-profiles">MANAGE PROFILES</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
