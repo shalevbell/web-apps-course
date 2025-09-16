@@ -91,3 +91,6 @@ body {
     margin-top: 4px;
     display: none;
 }
+.form-control.is-invalid {
+    border: 1px solid #ff0000;
+}
