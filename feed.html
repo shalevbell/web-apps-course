@@ -49,9 +49,20 @@
                 </div>
                 <!-- Icons + profile -->
                 <div class="icons d-flex align-items-center">
-                    <a href="#"><i class="bi bi-search"></i></a>
-                    <a href="#"><i class="bi bi-bell"></i></a>
-                    <a href="profiles.html" class="d-flex align-items-center">
+                    <!-- Search -->
+                    <div class="search-container">
+                        <div class="position-relative">
+                            <input type="text" class="search-input" id="searchInput" placeholder="Titles, people, genres">
+                            <button class="search-btn" id="searchBtn">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <button class="sort-btn" id="sortBtn" title="Sort alphabetically">
+                            <i class="bi bi-sort-alpha-down"></i>
+                        </button>
+                    </div>
+                    <a href="#" class="header-icon"><i class="bi bi-bell"></i></a>
+                    <a href="profiles.html" class="d-flex align-items-center header-icon">
                         <img alt="Profile" class="profile" id="profileImage">
                         <i class="bi bi-caret-down-fill ms-1" style="font-size: 10px;"></i>
                     </a>
@@ -63,6 +74,24 @@
             </div>
         </div>
     </header>
+    <!-- Hero Section -->
+    <div class="hero-section" id="heroSection">
+        <!-- Hero content will be dynamically generated -->
+    </div>
+    <!-- Search Results -->
+    <div class="search-results-container" id="searchResultsContainer">
+        <h2 class="section-title">Search Results</h2>
+        <div class="content-row" id="searchResults"></div>
+        <div class="clear-search">
+            <button id="clearSearchBtn" class="btn btn-dark">
+                <i class="bi bi-x-circle me-2"></i>Clear Search
+            </button>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Content will be dynamically generated here -->
+    </div>
     <!-- JavaScript -->
     <script src="./js/auth.js"></script>
     <script src="./js/feed.js"></script>
