@@ -243,6 +243,32 @@ body {
     padding: 0 4%;
 }
 
+/* Custom scrollbar styling to hide white scrollbars */
+/* For webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(51, 51, 51, 0.7);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(85, 85, 85, 0.8);
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(51, 51, 51, 0.7) transparent;
+}
+
 .content-row {
     display: flex;
     overflow-x: auto;
