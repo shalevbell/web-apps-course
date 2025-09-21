@@ -246,8 +246,7 @@ function createHeartAnimation(button) {
 // Functions for managing likes in localStorage
 function getLikeCount(contentId) {
     const likes = JSON.parse(localStorage.getItem('contentLikes') || '{}');
-    const key = `${getProfileId()}_${contentId}`;
-    return likes[key] || 0;
+    return likes[contentId] || 0;
 }
 
 function isContentLiked(contentId) {
@@ -258,14 +257,18 @@ function isContentLiked(contentId) {
 }
 
 function likeContent(contentId) {
-    // Increment like count
-    const currentCount = getLikeCount(contentId);
+    // Check if this profile already liked this content
+    const alreadyLiked = isContentLiked(contentId);
+    if (alreadyLiked) {
+        return; // User already liked this content, do nothing
+    }
+
+    // Increment like count (global across all users)
     const likes = JSON.parse(localStorage.getItem('contentLikes') || '{}');
-    const key = `${getProfileId()}_${contentId}`;
-    likes[key] = currentCount + 1;
+    likes[contentId] = (likes[contentId] || 0) + 1;
     localStorage.setItem('contentLikes', JSON.stringify(likes));
 
-    // Add to liked content
+    // Add to liked content for this profile
     const profileId = getProfileId();
     const likedContent = JSON.parse(localStorage.getItem('likedContent') || '{}');
 
@@ -273,22 +276,25 @@ function likeContent(contentId) {
         likedContent[profileId] = [];
     }
 
-    if (!likedContent[profileId].includes(contentId)) {
-        likedContent[profileId].push(contentId);
-    }
-
+    likedContent[profileId].push(contentId);
     localStorage.setItem('likedContent', JSON.stringify(likedContent));
 }
 
 function unlikeContent(contentId) {
-    // Decrement like count
-    const currentCount = getLikeCount(contentId);
-    const likes = JSON.parse(localStorage.getItem('contentLikes') || '{}');
-    const key = `${getProfileId()}_${contentId}`;
-    likes[key] = Math.max(0, currentCount - 1);
-    localStorage.setItem('contentLikes', JSON.stringify(likes));
+    // Check if this profile has liked this content
+    const hasLiked = isContentLiked(contentId);
+    if (!hasLiked) {
+        return; // User hasn't liked this content, do nothing
+    }
 
-    // Remove from liked content
+    // Decrement like count (global across all users)
+    const likes = JSON.parse(localStorage.getItem('contentLikes') || '{}');
+    if (likes[contentId]) {
+        likes[contentId] = Math.max(0, likes[contentId] - 1);
+        localStorage.setItem('contentLikes', JSON.stringify(likes));
+    }
+
+    // Remove from liked content for this profile
     const profileId = getProfileId();
     const likedContent = JSON.parse(localStorage.getItem('likedContent') || '{}');
 
