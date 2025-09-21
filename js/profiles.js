@@ -3,12 +3,12 @@ const profiles = [
             {
                 id: 1,
                 profileName: "Adi",
-                pic: "../_images/profile/profile_pic_1.png"
+                pic: "./_images/profile/profile_pic_1.png"
             },
             {
                 id: 2,
                 profileName: "Shalev",
-                pic: "../_images/profile/profile_pic_2.png"
+                pic: "./_images/profile/profile_pic_2.png"
             },
             {
                 id: 3,
