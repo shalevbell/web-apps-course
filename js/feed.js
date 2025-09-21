@@ -5,6 +5,28 @@ function getProfileId() {
     return localStorage.getItem('selectedProfileId') || '1';
 }
 
+function getProfileName() {
+    return localStorage.getItem('selectedProfileName') || 'User';
+}
+
+// Function to render greeting section
+function renderGreetingSection() {
+    const profileName = getProfileName();
+    const greetingSection = document.createElement('div');
+    greetingSection.className = 'greeting-section';
+    greetingSection.innerHTML = `
+        <div class="container-fluid">
+            <h2 class="greeting">Hello, ${profileName}</h2>
+            <p class="greeting-subtitle">What do you want to watch today?</p>
+        </div>
+    `;
+
+    // Insert after header and before hero section
+    const header = document.querySelector('.header');
+    const heroSection = document.getElementById('heroSection');
+    header.parentNode.insertBefore(greetingSection, heroSection);
+}
+
 // On DOM init will render
 document.addEventListener('DOMContentLoaded', function() {
     // Set profile image in header based on the selected profile
@@ -18,6 +40,9 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         logout();
     });
+
+    // Render the greeting section
+    renderGreetingSection();
 
     // Load content data
     loadContentData();
