@@ -8,9 +8,6 @@ app.use(express.json());
 // Parse URL-encoded request bodies
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from the current directory
-app.use(express.static(path.join(__dirname)));
-
 // Logs all incoming requests with timestamp
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
@@ -18,11 +15,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
 // ============================================
 // API Routes
 // ============================================
 
-const routes = require('./server/routes');
+const routes = require('./src/routes');
 app.use('/api', routes);
 
 // ============================================
