@@ -19,6 +19,29 @@ app.use((req, res, next) => {
 });
 
 // ============================================
+// API Routes
+// ============================================
+
+const routes = require('./server/routes');
+app.use('/api', routes);
+
+// ============================================
+// Error Handling Middleware
+// ============================================
+
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// General error handler
+app.use((err, req, res, next) => {
+  console.error(`Error: ${err.message}`);
+  console.error(err.stack);
+  res.status(500).json({ error: 'Server error occurred' });
+});
+
+// ============================================
 // Start Server
 // ============================================
 
