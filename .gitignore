@@ -138,10 +138,6 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# Server data files (except examples)
-server/data/*.json
-!server/data/.gitkeep
-
 # Data directory - ignore user data but keep static content
 src/data/*.json
 !src/data/content.json
