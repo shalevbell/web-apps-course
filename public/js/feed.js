@@ -54,9 +54,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setupSortButton();
 });
 
-// Function to load content from json
+// Function to load content from API
 function loadContentData() {
-    fetch('./data/content.json')
+    fetch('/api/content')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');

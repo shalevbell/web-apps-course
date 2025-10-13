@@ -137,3 +137,7 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Data directory - ignore user data but keep static content
+src/data/*.json
+!src/data/content.json

@@ -1,0 +1,14 @@
+{
+  "name": "web-apps-course",
+  "version": "1.0.0",
+  "description": "Web Apps Course Project for Netflix Clone",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
