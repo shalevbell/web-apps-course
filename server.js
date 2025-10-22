@@ -52,12 +52,12 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB and start server
 const startServer = async () => {
   try {
-    await connectDB();
+    const dbConnected = await connectDB();
     app.listen(PORT, () => {
       console.log('='.repeat(50));
       console.log(`Web Apps Course Netflix Clone Server`);
       console.log(`Server running on port ${PORT}`);
-      console.log(`✅ Database: Connected`);
+      console.log(`Database: ${dbConnected ? '✅ Connected' : '⚠️  Not Connected'}`);
       console.log(`Visit: http://localhost:${PORT}/login.html`);
       console.log('='.repeat(50));
     });
