@@ -13,8 +13,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     
     let isValid = true;
     
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email validation - matches MongoDB validation pattern
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
     if (!emailRegex.test(email.value)) {
         showError(email, emailError, 'Please enter a valid email address');
         isValid = false;
