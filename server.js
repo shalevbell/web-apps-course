@@ -57,7 +57,7 @@ const startServer = async () => {
       console.log('='.repeat(50));
       console.log(`Web Apps Course Netflix Clone Server`);
       console.log(`Server running on port ${PORT}`);
-      console.log(`Database: ${dbConnected ? '✅ Connected' : '⚠️  Not Connected'}`);
+      console.log(`Database: ${dbConnected ? '✅' : '⚠️'}`);
       console.log(`Visit: http://localhost:${PORT}/login.html`);
       console.log('='.repeat(50));
     });
