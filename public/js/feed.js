@@ -58,9 +58,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Render the greeting section
     renderGreetingSection();
 
-    // Load content data and likes
+    // Load content data first
     await loadContentData();
+
+    // Load likes data before rendering content
     await loadLikesData();
+
+    // Re-render content sections with likes data
+    renderContentSections();
 
     // Set up search functionality
     setupSearch();
@@ -78,7 +83,7 @@ async function loadContentData() {
         }
         contentData = await response.json();
         renderHeroSection();
-        renderContentSections();
+        // Don't render content sections yet - wait for likes data to load first
     } catch (error) {
         console.error('Error loading content data:', error);
     }
