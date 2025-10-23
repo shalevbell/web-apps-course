@@ -61,9 +61,13 @@ function renderProfiles() {
 }
         
 function selectProfile(profileId, profileName) {
+    // Find the full profile object to get the avatar
+    const profile = profiles.find(p => p.id === profileId);
+
     localStorage.setItem('selectedProfileId', profileId);
     localStorage.setItem('selectedProfileName', profileName);
-            
+    localStorage.setItem('selectedProfileAvatar', profile ? profile.avatar : 'profile_pic_1.png');
+
     // Redirect to feed page
     window.location.href = 'feed.html';
 }

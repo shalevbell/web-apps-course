@@ -11,14 +11,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadUserInfo() {
     const userEmail = localStorage.getItem('userEmail');
     const profileImage = document.getElementById('profileImage');
-    const selectedProfileId = localStorage.getItem('selectedProfileId');
-    
+    const selectedProfileAvatar = localStorage.getItem('selectedProfileAvatar');
+
     if (userEmail) {
         document.getElementById('userEmail').textContent = userEmail;
     }
-    
-    if (selectedProfileId) {
-        profileImage.src = `./_images/profile/profile_pic_${selectedProfileId}.png`;
+
+    if (selectedProfileAvatar) {
+        profileImage.src = `./_images/profile/${selectedProfileAvatar}`;
+    } else {
+        // Default avatar if no profile selected yet
+        profileImage.src = `./_images/profile/profile_pic_default.png`;
     }
 }
 
@@ -140,9 +143,22 @@ async function handleAddProfile(event) {
         if (response.ok) {
             // Success - show message and refresh profiles
             showSuccessMessage('Profile created successfully!');
+
+            // If this is the first profile, automatically select it
+            if (profiles.length === 0) {
+                const newProfile = data.data;
+                localStorage.setItem('selectedProfileId', newProfile.id);
+                localStorage.setItem('selectedProfileName', newProfile.name);
+                localStorage.setItem('selectedProfileAvatar', newProfile.avatar);
+
+                // Update profile image in header
+                const profileImage = document.getElementById('profileImage');
+                profileImage.src = `./_images/profile/${newProfile.avatar}`;
+            }
+
             profileName.value = '';
             selectedAvatar.checked = false;
-            
+
             // Refresh profiles list
             await loadProfiles();
         } else {
