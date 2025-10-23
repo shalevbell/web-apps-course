@@ -22,10 +22,12 @@ function checkAuth(redirectIfNotLoggedIn = true) {
 function logout() {
     localStorage.removeItem('isLoggedIn');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
     localStorage.removeItem('selectedProfileId');
     localStorage.removeItem('selectedProfileName');
+    localStorage.removeItem('selectedProfileAvatar');
     localStorage.removeItem('rememberMe');
-    
+
     // Redirect to login page
     window.location.href = 'login.html';
 }
