@@ -13,7 +13,16 @@ const getProfiles = async (req, res) => {
     }
 
     const profiles = await Profile.find({ userId }).select('-userId -__v');
-    sendSuccess(res, profiles, 'Profiles retrieved successfully');
+
+    // Transform profiles to include 'id' field instead of '_id'
+    const transformedProfiles = profiles.map(profile => ({
+      id: profile._id,
+      name: profile.name,
+      avatar: profile.avatar,
+      likes: profile.likes
+    }));
+
+    sendSuccess(res, transformedProfiles, 'Profiles retrieved successfully');
   } catch (error) {
     console.error('Get profiles error:', error);
     sendError(res, 'Server error retrieving profiles', 500);

@@ -1,9 +1,16 @@
 /* Settings page styles */
+body {
+    background: #141414;
+    margin: 0;
+    padding: 0;
+}
+
 .main-content {
     background: #141414;
     min-height: 100vh;
-    padding: 40px 0;
+    padding: 60px 0;
     color: white;
+    margin-top: -50px;
 }
 
 .page-title {
@@ -240,13 +247,16 @@
     margin-bottom: 20px;
 }
 
-/* Header styles (matching feed page) */
+/* Header styles with Netflix background */
 .header {
-    background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, transparent 100%);
-    padding: 15px 0;
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.7) 30%, rgba(20, 20, 20, 0.9) 70%, rgba(20, 20, 20, 0.98) 90%, #141414 100%), url('../_images/netflix_assets/netflix_background.jpg');
+    background-size: cover;
+    background-position: center 20%;
+    padding: 15px 0 120px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 .brand img {

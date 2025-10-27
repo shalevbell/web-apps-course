@@ -32,38 +32,41 @@ async function loadProfiles() {
 function renderProfiles() {
     const profilesList = document.getElementById('profilesList');
     profilesList.innerHTML = '';
-    
+
     if (profiles.length === 0) {
         // Show empty state
         profilesList.innerHTML = `
             <div class="empty-state">
                 <h3>No profiles yet</h3>
-                <p>Create your first profile in Settings to get started.</p>
-                <a href="settings.html" class="btn btn-primary">Go to Settings</a>
+                <p>Select MANAGE PROFILES to get started.</p>
             </div>
         `;
         return;
     }
-    
+
     profiles.forEach(profile => {
         const profileDiv = document.createElement('div');
         profileDiv.className = 'profile';
         profileDiv.innerHTML = `
             <img src="./_images/profile/${profile.avatar}" alt="${profile.name}" class="profile-pic">
             <div class="profile-name">${profile.name}</div>`;
-                
+
         profileDiv.addEventListener('click', function() {
             selectProfile(profile.id, profile.name);
         });
-                
+
         profilesList.appendChild(profileDiv);
     });
 }
         
 function selectProfile(profileId, profileName) {
+    // Find the full profile object to get the avatar
+    const profile = profiles.find(p => p.id === profileId);
+
     localStorage.setItem('selectedProfileId', profileId);
     localStorage.setItem('selectedProfileName', profileName);
-            
+    localStorage.setItem('selectedProfileAvatar', profile ? profile.avatar : 'profile_pic_1.png');
+
     // Redirect to feed page
     window.location.href = 'feed.html';
 }
@@ -82,5 +85,13 @@ function showError(message) {
 // Load profiles when the DOM loads
 document.addEventListener('DOMContentLoaded', function() {
     loadProfiles();
+
+    // Add event listener for Manage Profiles button
+    const manageProfilesBtn = document.querySelector('.btn-manage-profiles');
+    if (manageProfilesBtn) {
+        manageProfilesBtn.addEventListener('click', function() {
+            window.location.href = 'settings.html';
+        });
+    }
 });
         

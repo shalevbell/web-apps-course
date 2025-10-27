@@ -4,11 +4,15 @@ let profileLikes = []; // User's liked content IDs
 let globalLikeCounts = {}; // Global like counts for all content
 
 function getProfileId() {
-    return localStorage.getItem('selectedProfileId') || '1';
+    return localStorage.getItem('selectedProfileId');
 }
 
 function getProfileName() {
     return localStorage.getItem('selectedProfileName') || 'User';
+}
+
+function getProfileAvatar() {
+    return localStorage.getItem('selectedProfileAvatar') || 'profile_pic_1.png';
 }
 
 // Function to render greeting section
@@ -31,10 +35,18 @@ function renderGreetingSection() {
 
 // On DOM init will render
 document.addEventListener('DOMContentLoaded', async function() {
-    // Set profile image in header based on the selected profile
-    const selectedProfileId = getProfileId();
+    // Check if profile is selected
+    const profileId = getProfileId();
+    if (!profileId) {
+        console.error('No profile selected');
+        window.location.href = 'profiles.html';
+        return;
+    }
+
+    // Set profile image in header based on the selected profile's avatar
+    const profileAvatar = getProfileAvatar();
     const profileImage = document.getElementById('profileImage');
-    profileImage.src = `./_images/profile/profile_pic_${selectedProfileId}.png`;
+    profileImage.src = `./_images/profile/${profileAvatar}`;
 
     // Set up logout functionality
     const logoutButton = document.getElementById('logoutBtn');
@@ -46,9 +58,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Render the greeting section
     renderGreetingSection();
 
-    // Load content data and likes
+    // Load content data first
     await loadContentData();
+
+    // Load likes data before rendering content
     await loadLikesData();
+
+    // Re-render content sections with likes data
+    renderContentSections();
 
     // Set up search functionality
     setupSearch();
@@ -66,7 +83,7 @@ async function loadContentData() {
         }
         contentData = await response.json();
         renderHeroSection();
-        renderContentSections();
+        // Don't render content sections yet - wait for likes data to load first
     } catch (error) {
         console.error('Error loading content data:', error);
     }
