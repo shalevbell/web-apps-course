@@ -1,0 +1,148 @@
+/* Register page styles - matching login page design */
+.register-box-bg {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../_images/netflix_assets/netflix_background.jpg');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.netflix-logo {
+    height: 40px;
+    margin-bottom: 30px;
+}
+
+.register-box {
+    background: rgba(0, 0, 0, 0.8);
+    padding: 40px;
+    border-radius: 8px;
+    color: white;
+    max-width: 450px;
+    margin: 0 auto;
+}
+
+.register-box h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 30px;
+    color: white;
+}
+
+.form-control {
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-control:focus {
+    background: #333;
+    border-color: #e50914;
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(229, 9, 20, 0.25);
+}
+
+.form-control::placeholder {
+    color: #8c8c8c;
+}
+
+.btn-sign-up {
+    background: #e50914;
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 4px;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-sign-up:hover {
+    background: #f40612;
+    color: white;
+}
+
+.btn-sign-up:disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+.signin-text {
+    color: #8c8c8c;
+    text-align: center;
+}
+
+.signin-text a {
+    color: white;
+    text-decoration: none;
+}
+
+.signin-text a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #e50914;
+    font-size: 14px;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-control.is-invalid {
+    border-color: #e50914;
+}
+
+.text-muted {
+    color: #8c8c8c !important;
+}
+
+.text-muted a {
+    color: #8c8c8c;
+    text-decoration: none;
+}
+
+.text-muted a:hover {
+    text-decoration: underline;
+}
+
+/* Loading state */
+.btn-sign-up.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-sign-up.loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Success message */
+.success-message {
+    background: #28a745;
+    color: white;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: none;
+}

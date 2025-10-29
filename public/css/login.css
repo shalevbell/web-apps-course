@@ -55,6 +55,36 @@ body {
 .btn-sign-in:hover {
     background-color: #df040f;
 }
+
+.btn-sign-in:disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+/* Loading state */
+.btn-sign-in.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-sign-in.loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 .btn-enter-code {
     background-color: #333;
     color: #fff;

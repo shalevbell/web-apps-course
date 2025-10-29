@@ -1,12 +1,18 @@
 let contentData = [];
 let currentView = 'categorized'; // categorized/alphabetical
+let profileLikes = []; // User's liked content IDs
+let globalLikeCounts = {}; // Global like counts for all content
 
 function getProfileId() {
-    return localStorage.getItem('selectedProfileId') || '1';
+    return localStorage.getItem('selectedProfileId');
 }
 
 function getProfileName() {
     return localStorage.getItem('selectedProfileName') || 'User';
+}
+
+function getProfileAvatar() {
+    return localStorage.getItem('selectedProfileAvatar') || 'profile_pic_1.png';
 }
 
 // Function to render greeting section
@@ -28,11 +34,19 @@ function renderGreetingSection() {
 }
 
 // On DOM init will render
-document.addEventListener('DOMContentLoaded', function() {
-    // Set profile image in header based on the selected profile
-    const selectedProfileId = getProfileId();
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check if profile is selected
+    const profileId = getProfileId();
+    if (!profileId) {
+        console.error('No profile selected');
+        window.location.href = 'profiles.html';
+        return;
+    }
+
+    // Set profile image in header based on the selected profile's avatar
+    const profileAvatar = getProfileAvatar();
     const profileImage = document.getElementById('profileImage');
-    profileImage.src = `./_images/profile/profile_pic_${selectedProfileId}.png`;
+    profileImage.src = `./_images/profile/${profileAvatar}`;
 
     // Set up logout functionality
     const logoutButton = document.getElementById('logoutBtn');
@@ -44,8 +58,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Render the greeting section
     renderGreetingSection();
 
-    // Load content data
-    loadContentData();
+    // Load content data first
+    await loadContentData();
+
+    // Load likes data before rendering content
+    await loadLikesData();
+
+    // Re-render content sections with likes data
+    renderContentSections();
 
     // Set up search functionality
     setupSearch();
@@ -55,22 +75,41 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Function to load content from API
-function loadContentData() {
-    fetch('/api/content')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            contentData = data;
-            renderHeroSection();
-            renderContentSections();
-        })
-        .catch(error => {
-            console.error('Error loading content data:', error);
-        });
+async function loadContentData() {
+    try {
+        const response = await fetch('/api/content');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        contentData = await response.json();
+        renderHeroSection();
+        // Don't render content sections yet - wait for likes data to load first
+    } catch (error) {
+        console.error('Error loading content data:', error);
+    }
+}
+
+// Function to load likes data from server
+async function loadLikesData() {
+    const profileId = getProfileId();
+    
+    try {
+        // Load profile's likes
+        const profileResponse = await fetch(`/api/profiles/${profileId}/likes`);
+        if (profileResponse.ok) {
+            const profileData = await profileResponse.json();
+            profileLikes = profileData.data.likes || [];
+        }
+        
+        // Load global like counts
+        const globalResponse = await fetch('/api/content/likes');
+        if (globalResponse.ok) {
+            const globalData = await globalResponse.json();
+            globalLikeCounts = globalData.data || {};
+        }
+    } catch (error) {
+        console.error('Error loading likes data:', error);
+    }
 }
 
 // Function to render hero section with a random content item
@@ -199,31 +238,48 @@ function createContentItemHTML(item) {
 }
 
 // Function to handle like button clicks
-function handleLikeClick(event) {
+async function handleLikeClick(event) {
     event.stopPropagation();
 
     const button = event.currentTarget;
     const contentId = parseInt(button.getAttribute('data-id'));
     const isLiked = isContentLiked(contentId);
+    const profileId = getProfileId();
 
-    // Toggle like status
-    if (isLiked) {
-        // Unlike
-        unlikeContent(contentId);
-        button.classList.remove('liked');
-        button.innerHTML = '<i class="bi bi-heart"></i>';
-    } else {
-        // Like
-        likeContent(contentId);
-        button.classList.add('liked');
-        button.innerHTML = '<i class="bi bi-heart-fill"></i>';
-        createHeartAnimation(button);
+    // Disable button during API call
+    button.disabled = true;
+
+    try {
+        if (isLiked) {
+            // Unlike
+            await unlikeContent(contentId, profileId);
+            button.classList.remove('liked');
+            button.innerHTML = '<i class="bi bi-heart"></i>';
+        } else {
+            // Like
+            await likeContent(contentId, profileId);
+            button.classList.add('liked');
+            button.innerHTML = '<i class="bi bi-heart-fill"></i>';
+            createHeartAnimation(button);
+        }
+
+        // Update like count display
+        const likeCount = getLikeCount(contentId);
+        const likeCountEl = button.nextElementSibling;
+        likeCountEl.textContent = `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`;
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        // Revert UI changes on error
+        if (isLiked) {
+            button.classList.add('liked');
+            button.innerHTML = '<i class="bi bi-heart-fill"></i>';
+        } else {
+            button.classList.remove('liked');
+            button.innerHTML = '<i class="bi bi-heart"></i>';
+        }
+    } finally {
+        button.disabled = false;
     }
-
-    // Update like count display
-    const likeCount = getLikeCount(contentId);
-    const likeCountEl = button.nextElementSibling;
-    likeCountEl.textContent = `${likeCount} ${likeCount === 1 ? 'like' : 'likes'}`;
 }
 
 // Function to create heart animation
@@ -243,64 +299,60 @@ function createHeartAnimation(button) {
     }, 1000);
 }
 
-// Functions for managing likes in localStorage
+// Functions for managing likes with server API
 function getLikeCount(contentId) {
-    const likes = JSON.parse(localStorage.getItem('contentLikes') || '{}');
-    return likes[contentId] || 0;
+    return globalLikeCounts[contentId] || 0;
 }
 
 function isContentLiked(contentId) {
-    const profileId = getProfileId();
-    const likedContent = JSON.parse(localStorage.getItem('likedContent') || '{}');
-    const userLikes = likedContent[profileId] || [];
-    return userLikes.includes(contentId);
+    return profileLikes.includes(contentId);
 }
 
-function likeContent(contentId) {
-    // Check if this profile already liked this content
-    const alreadyLiked = isContentLiked(contentId);
-    if (alreadyLiked) {
-        return; // User already liked this content, do nothing
+async function likeContent(contentId, profileId) {
+    try {
+        const response = await fetch(`/api/profiles/${profileId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ contentId })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to like content');
+        }
+
+        // Update local state
+        if (!profileLikes.includes(contentId)) {
+            profileLikes.push(contentId);
+        }
+        globalLikeCounts[contentId] = (globalLikeCounts[contentId] || 0) + 1;
+    } catch (error) {
+        console.error('Error liking content:', error);
+        throw error;
     }
-
-    // Increment like count (global across all users)
-    const likes = JSON.parse(localStorage.getItem('contentLikes') || '{}');
-    likes[contentId] = (likes[contentId] || 0) + 1;
-    localStorage.setItem('contentLikes', JSON.stringify(likes));
-
-    // Add to liked content for this profile
-    const profileId = getProfileId();
-    const likedContent = JSON.parse(localStorage.getItem('likedContent') || '{}');
-
-    if (!likedContent[profileId]) {
-        likedContent[profileId] = [];
-    }
-
-    likedContent[profileId].push(contentId);
-    localStorage.setItem('likedContent', JSON.stringify(likedContent));
 }
 
-function unlikeContent(contentId) {
-    // Check if this profile has liked this content
-    const hasLiked = isContentLiked(contentId);
-    if (!hasLiked) {
-        return; // User hasn't liked this content, do nothing
-    }
+async function unlikeContent(contentId, profileId) {
+    try {
+        const response = await fetch(`/api/profiles/${profileId}/unlike`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ contentId })
+        });
 
-    // Decrement like count (global across all users)
-    const likes = JSON.parse(localStorage.getItem('contentLikes') || '{}');
-    if (likes[contentId]) {
-        likes[contentId] = Math.max(0, likes[contentId] - 1);
-        localStorage.setItem('contentLikes', JSON.stringify(likes));
-    }
+        if (!response.ok) {
+            throw new Error('Failed to unlike content');
+        }
 
-    // Remove from liked content for this profile
-    const profileId = getProfileId();
-    const likedContent = JSON.parse(localStorage.getItem('likedContent') || '{}');
-
-    if (likedContent[profileId]) {
-        likedContent[profileId] = likedContent[profileId].filter(id => id !== contentId);
-        localStorage.setItem('likedContent', JSON.stringify(likedContent));
+        // Update local state
+        profileLikes = profileLikes.filter(id => id !== contentId);
+        globalLikeCounts[contentId] = Math.max(0, (globalLikeCounts[contentId] || 1) - 1);
+    } catch (error) {
+        console.error('Error unliking content:', error);
+        throw error;
     }
 }
 

@@ -1,7 +1,13 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const { body } = require('express-validator');
 const router = express.Router();
+
+// Import controllers
+const authController = require('../controllers/authController');
+const profileController = require('../controllers/profileController');
+const validateRequest = require('../middleware/validateRequest');
 
 // ============================================
 // API Routes
@@ -23,5 +29,81 @@ router.get('/content', (req, res) => {
     res.status(500).json({ error: 'Failed to load content data' });
   }
 });
+
+// ============================================
+// Authentication Routes
+// ============================================
+
+// Register
+router.post('/auth/register', [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please enter a valid email'),
+  body('username')
+    .isLength({ min: 3, max: 20 })
+    .withMessage('Username must be between 3 and 20 characters')
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username can only contain letters, numbers, and underscores'),
+  body('password')
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long'),
+  body('confirmPassword')
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error('Passwords do not match');
+      }
+      return true;
+    })
+], validateRequest, authController.register);
+
+// Login
+router.post('/auth/login', [
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('Please enter a valid email'),
+  body('password')
+    .notEmpty()
+    .withMessage('Password is required')
+], validateRequest, authController.login);
+
+// ============================================
+// Profile Routes
+// ============================================
+
+// Get user profiles
+router.get('/users/:userId/profiles', profileController.getProfiles);
+
+// Create new profile
+router.post('/users/:userId/profiles', [
+  body('name')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('Profile name must be between 1 and 20 characters')
+    .trim(),
+  body('avatar')
+    .isIn(['profile_pic_1.png', 'profile_pic_2.png', 'profile_pic_3.png', 'profile_pic_4.png'])
+    .withMessage('Invalid avatar selection')
+], validateRequest, profileController.createProfile);
+
+// Get profile likes
+router.get('/profiles/:profileId/likes', profileController.getLikes);
+
+// Like content
+router.post('/profiles/:profileId/like', [
+  body('contentId')
+    .isNumeric()
+    .withMessage('Content ID must be a number')
+], validateRequest, profileController.likeContent);
+
+// Unlike content
+router.post('/profiles/:profileId/unlike', [
+  body('contentId')
+    .isNumeric()
+    .withMessage('Content ID must be a number')
+], validateRequest, profileController.unlikeContent);
+
+// Get global like counts
+router.get('/content/likes', profileController.getGlobalLikeCounts);
 
 module.exports = router;

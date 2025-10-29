@@ -1,48 +1,132 @@
-// On form submit will run the function below. 
-// Password and email requirement is handled by the input 'required' attribute
-document.getElementById('loginForm').addEventListener('submit', function(validation) {
-    validation.preventDefault();
-            
+// Login form validation and server authentication
+document.getElementById('loginForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
     const email = document.getElementById('emailInput');
     const password = document.getElementById('passwordInput');
     const passwordError = document.getElementById('passwordError');
     const emailError = document.getElementById('emailError');
-            
-    let isValid = true;
-            
+    const submitBtn = document.querySelector('.btn-sign-in');
+    
     // Reset previous errors
-    password.classList.remove('is-invalid');
-    email.classList.remove('is-invalid');
-    passwordError.style.display = 'none';
-    emailError.style.display = 'none';
-            
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    clearErrors();
+    
+    let isValid = true;
+    
+    // Email validation - matches MongoDB validation pattern
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
     if (!emailRegex.test(email.value)) {
-        emailError.textContent = 'Please enter a valid email address';
-        emailError.style.display = 'block';
-        email.classList.add('is-invalid');
+        showError(email, emailError, 'Please enter a valid email address');
         isValid = false;
     }
-            
+    
     // Password validation
     if (password.value.length < 6) {
-        passwordError.textContent = 'Password must be at least 6 characters long';
-        passwordError.style.display = 'block';
-        password.classList.add('is-invalid');
+        showError(password, passwordError, 'Password must be at least 6 characters long');
         isValid = false;
     }
+    
+    if (!isValid) return;
+    
+    // Show loading state
+    setLoadingState(submitBtn, true);
+    
+    try {
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email.value,
+                password: password.value
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Login successful
+            const rememberMe = document.getElementById('rememberMe').checked;
             
-    // Form is valid, save connection state and redirect
-    if (isValid) {
-        const rememberMe = document.getElementById('rememberMe').checked;
-        
-        // Save user data to localStorage
-        localStorage.setItem('userEmail', email.value);
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('rememberMe', String(rememberMe));
-        
-        // Redirect to profiles page
-        window.location.href = 'profiles.html';
+            // Save user data to localStorage
+            localStorage.setItem('userEmail', data.data.email);
+            localStorage.setItem('userId', data.data.id);
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('rememberMe', String(rememberMe));
+            
+            // Redirect to profiles page
+            window.location.href = 'profiles.html';
+        } else {
+            // Handle server errors
+            if (response.status === 404) {
+                showError(email, emailError, 'User not found');
+            } else if (response.status === 401) {
+                showError(password, passwordError, 'Incorrect password');
+            } else {
+                showGeneralError(data.error || 'Login failed. Please try again.');
+            }
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showGeneralError('Connection failed. Please check your internet connection and try again.');
+    } finally {
+        setLoadingState(submitBtn, false);
+    }
+});
+
+function clearErrors() {
+    const inputs = ['emailInput', 'passwordInput'];
+    const errors = ['emailError', 'passwordError'];
+    
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        input.classList.remove('is-invalid');
+    });
+    
+    errors.forEach(id => {
+        const error = document.getElementById(id);
+        error.style.display = 'none';
+        error.textContent = '';
+    });
+}
+
+function showError(input, errorElement, message) {
+    input.classList.add('is-invalid');
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+}
+
+function showGeneralError(message) {
+    // Create or update general error message
+    let errorDiv = document.getElementById('generalError');
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'generalError';
+        errorDiv.className = 'error-message';
+        errorDiv.style.textAlign = 'center';
+        errorDiv.style.marginBottom = '20px';
+        document.querySelector('.login-box').insertBefore(errorDiv, document.getElementById('loginForm'));
+    }
+    
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+function setLoadingState(button, isLoading) {
+    if (isLoading) {
+        button.disabled = true;
+        button.classList.add('loading');
+    } else {
+        button.disabled = false;
+        button.classList.remove('loading');
+    }
+}
+
+// Check if redirected from registration with success message
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('registered') === 'true') {
+        showGeneralError('Registration successful! Please sign in with your new account.');
     }
 });

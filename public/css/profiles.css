@@ -39,6 +39,37 @@ body {
 .profile:hover {
     transform: scale(1.1);
 }
+
+/* Empty and error states */
+.empty-state, .error-state {
+    text-align: center;
+    padding: 40px;
+    color: #8c8c8c;
+}
+
+.empty-state h3, .error-state h3 {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.empty-state p, .error-state p {
+    margin-bottom: 20px;
+}
+
+.empty-state .btn, .error-state .btn {
+    background: #e50914;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.empty-state .btn:hover, .error-state .btn:hover {
+    background: #f40612;
+    color: white;
+}
 .profile:hover .profile-name {
     color: white;
 }
