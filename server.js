@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const connectDB = require('./src/config/db');
+const logger = require('./src/utils/logger');
 const app = express();
 
 // Parse JSON request bodies
@@ -38,6 +39,7 @@ app.use('/api/*', (req, res) => {
 
 // General error handler
 app.use((err, req, res, next) => {
+  logger.error(`[SERVER] Error: ${err.message}`);
   console.error(`Error: ${err.message}`);
   console.error(err.stack);
   res.status(500).json({ error: 'Server error occurred' });
@@ -60,8 +62,12 @@ const startServer = async () => {
       console.log(`Database: ${dbConnected ? '✅' : '⚠️'}`);
       console.log(`Visit: http://localhost:${PORT}/login.html`);
       console.log('='.repeat(50));
+
+      logger.info(`[SERVER] Server started on port ${PORT}`);
+      logger.info(`[SERVER] Database connection: ${dbConnected ? 'connected' : 'not connected'}`);
     });
   } catch (error) {
+    logger.error(`[SERVER] Failed to start server: ${error.message}`);
     console.error('Failed to start server:', error.message);
     process.exit(1);
   }

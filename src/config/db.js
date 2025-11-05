@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 const connectDB = async () => {
   const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/netflix-clone';
@@ -11,10 +12,12 @@ const connectDB = async () => {
     });
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    logger.info(`[DATABASE] MongoDB connected: ${conn.connection.host}`);
     return true;
   } catch (error) {
     console.warn(`MongoDB connection failed: ${error.message}`);
     console.warn('Server will start without database connection. Some features may not work.');
+    logger.warn(`[DATABASE] MongoDB connection failed: ${error.message}`);
     return false;
   }
 };
