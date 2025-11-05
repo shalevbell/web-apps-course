@@ -1,6 +1,7 @@
 const Profile = require('../models/Profile');
 const User = require('../models/User');
 const { sendSuccess, sendError } = require('../utils/responses');
+const logger = require('../utils/logger');
 
 const getProfiles = async (req, res) => {
   try {
@@ -37,6 +38,7 @@ const createProfile = async (req, res) => {
     // Verify user exists
     const user = await User.findById(userId);
     if (!user) {
+      logger.warn(`[PROFILE] Create profile failed - User not found: ${userId}`);
       return sendError(res, 'User not found', 404);
     }
 
@@ -58,14 +60,16 @@ const createProfile = async (req, res) => {
       likes: profile.likes
     };
 
+    logger.info(`[PROFILE] Profile created: ${name} for user ${user.email}`);
     sendSuccess(res, profileData, 'Profile created successfully', 201);
   } catch (error) {
+    logger.error(`[PROFILE] Create profile error: ${error.message}`);
     console.error('Create profile error:', error);
-    
+
     if (error.code === 11000) {
       return sendError(res, 'Profile name already exists for this user', 409);
     }
-    
+
     sendError(res, 'Server error creating profile', 500);
   }
 };
@@ -97,6 +101,7 @@ const likeContent = async (req, res) => {
 
     const profile = await Profile.findById(profileId);
     if (!profile) {
+      logger.warn(`[PROFILE] Like content failed - Profile not found: ${profileId}`);
       return sendError(res, 'Profile not found', 404);
     }
 
@@ -104,10 +109,12 @@ const likeContent = async (req, res) => {
     if (!profile.likes.includes(contentId)) {
       profile.likes.push(contentId);
       await profile.save();
+      logger.info(`[PROFILE] Content liked: contentId=${contentId}, profile=${profile.name}`);
     }
 
     sendSuccess(res, { likes: profile.likes }, 'Content liked successfully');
   } catch (error) {
+    logger.error(`[PROFILE] Like content error: ${error.message}`);
     console.error('Like content error:', error);
     sendError(res, 'Server error liking content', 500);
   }
@@ -124,15 +131,22 @@ const unlikeContent = async (req, res) => {
 
     const profile = await Profile.findById(profileId);
     if (!profile) {
+      logger.warn(`[PROFILE] Unlike content failed - Profile not found: ${profileId}`);
       return sendError(res, 'Profile not found', 404);
     }
 
     // Remove like if exists
+    const hadLike = profile.likes.includes(contentId);
     profile.likes = profile.likes.filter(id => id !== contentId);
     await profile.save();
 
+    if (hadLike) {
+      logger.info(`[PROFILE] Content unliked: contentId=${contentId}, profile=${profile.name}`);
+    }
+
     sendSuccess(res, { likes: profile.likes }, 'Content unliked successfully');
   } catch (error) {
+    logger.error(`[PROFILE] Unlike content error: ${error.message}`);
     console.error('Unlike content error:', error);
     sendError(res, 'Server error unliking content', 500);
   }
@@ -153,6 +167,7 @@ const getGlobalLikeCounts = async (req, res) => {
 
     sendSuccess(res, counts, 'Global like counts retrieved successfully');
   } catch (error) {
+    logger.error(`[PROFILE] Get global like counts error: ${error.message}`);
     console.error('Get global like counts error:', error);
     sendError(res, 'Server error retrieving like counts', 500);
   }
