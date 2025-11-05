@@ -54,6 +54,7 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB and start server
 const startServer = async () => {
   try {
+    logger.info(`=======================================`);
     const dbConnected = await connectDB();
     app.listen(PORT, () => {
       console.log('='.repeat(50));
