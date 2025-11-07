@@ -39,6 +39,7 @@ app.use('/api/*', (req, res) => {
 
 // General error handler
 app.use((err, req, res, next) => {
+  logger.error(`[SERVER] Error: ${err.message}`);
   console.error(`Error: ${err.message}`);
   console.error(err.stack);
   res.status(500).json({ error: 'Server error occurred' });
@@ -53,6 +54,7 @@ const PORT = process.env.PORT || 3000;
 // Connect to MongoDB and start server
 const startServer = async () => {
   try {
+    logger.info(`=======================================`);
     const dbConnected = await connectDB();
 
     // Seed content into database if connected
@@ -67,8 +69,12 @@ const startServer = async () => {
       console.log(`Database: ${dbConnected ? '✅' : '⚠️'}`);
       console.log(`Visit: http://localhost:${PORT}/login.html`);
       console.log('='.repeat(50));
+
+      logger.info(`[SERVER] Server started on port ${PORT}`);
+      logger.info(`[SERVER] Database connection: ${dbConnected ? 'connected' : 'not connected'}`);
     });
   } catch (error) {
+    logger.error(`[SERVER] Failed to start server: ${error.message}`);
     console.error('Failed to start server:', error.message);
     process.exit(1);
   }
