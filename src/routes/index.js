@@ -1,13 +1,15 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
 const { body } = require('express-validator');
+const mongoose = require('mongoose');
 const router = express.Router();
 
 // Import controllers
 const authController = require('../controllers/authController');
 const profileController = require('../controllers/profileController');
 const validateRequest = require('../middleware/validateRequest');
+
+// Import models
+const Content = require('../models/Content');
 
 // ============================================
 // API Routes
@@ -19,13 +21,21 @@ router.get('/health', (req, res) => {
 });
 
 // Get content data
-router.get('/content', (req, res) => {
+router.get('/content', async (req, res) => {
   try {
-    const contentPath = path.join(__dirname, '../data/content.json');
-    const contentData = fs.readFileSync(contentPath, 'utf8');
-    res.json(JSON.parse(contentData));
+    // Check if database is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not available',
+        message: 'Content data requires database connection'
+      });
+    }
+
+    // Fetch all content from MongoDB, sorted by id
+    const contentData = await Content.find({}).sort({ id: 1 }).select('-__v -createdAt -updatedAt');
+    res.json(contentData);
   } catch (error) {
-    console.error('Error reading content.json:', error);
+    console.error('Error fetching content from database:', error);
     res.status(500).json({ error: 'Failed to load content data' });
   }
 });

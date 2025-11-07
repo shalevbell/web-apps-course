@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const connectDB = require('./src/config/db');
-const logger = require('./src/utils/logger');
+const { seedContent } = require('./src/utils/seedContent');
 const app = express();
 
 // Parse JSON request bodies
@@ -56,6 +56,12 @@ const startServer = async () => {
   try {
     logger.info(`=======================================`);
     const dbConnected = await connectDB();
+
+    // Seed content into database if connected
+    if (dbConnected) {
+      await seedContent();
+    }
+
     app.listen(PORT, () => {
       console.log('='.repeat(50));
       console.log(`Web Apps Course Netflix Clone Server`);
