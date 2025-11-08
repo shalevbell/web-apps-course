@@ -152,6 +152,71 @@ const unlikeContent = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+    const { name, avatar } = req.body;
+
+    const profile = await Profile.findById(profileId);
+    if (!profile) {
+      logger.warn(`[PROFILE] Update profile failed - Profile not found: ${profileId}`);
+      return sendError(res, 'Profile not found', 404);
+    }
+
+    // Update fields if provided
+    if (name !== undefined) {
+      profile.name = name;
+    }
+    if (avatar !== undefined) {
+      profile.avatar = avatar;
+    }
+
+    await profile.save();
+
+    // Return updated profile data
+    const profileData = {
+      id: profile._id,
+      name: profile.name,
+      avatar: profile.avatar,
+      likes: profile.likes
+    };
+
+    logger.info(`[PROFILE] Profile updated: ${profile.name} (${profileId})`);
+    sendSuccess(res, profileData, 'Profile updated successfully');
+  } catch (error) {
+    logger.error(`[PROFILE] Update profile error: ${error.message}`);
+    console.error('Update profile error:', error);
+
+    if (error.code === 11000) {
+      return sendError(res, 'Profile name already exists for this user', 409);
+    }
+
+    sendError(res, 'Server error updating profile', 500);
+  }
+};
+
+const deleteProfile = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+
+    const profile = await Profile.findById(profileId);
+    if (!profile) {
+      logger.warn(`[PROFILE] Delete profile failed - Profile not found: ${profileId}`);
+      return sendError(res, 'Profile not found', 404);
+    }
+
+    const profileName = profile.name;
+    await Profile.findByIdAndDelete(profileId);
+
+    logger.info(`[PROFILE] Profile deleted: ${profileName} (${profileId})`);
+    sendSuccess(res, { id: profileId }, 'Profile deleted successfully');
+  } catch (error) {
+    logger.error(`[PROFILE] Delete profile error: ${error.message}`);
+    console.error('Delete profile error:', error);
+    sendError(res, 'Server error deleting profile', 500);
+  }
+};
+
 const getGlobalLikeCounts = async (req, res) => {
   try {
     const likeCounts = await Profile.aggregate([
@@ -176,6 +241,8 @@ const getGlobalLikeCounts = async (req, res) => {
 module.exports = {
   getProfiles,
   createProfile,
+  updateProfile,
+  deleteProfile,
   getLikes,
   likeContent,
   unlikeContent,
