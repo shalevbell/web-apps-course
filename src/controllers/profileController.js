@@ -42,6 +42,13 @@ const createProfile = async (req, res) => {
       return sendError(res, 'User not found', 404);
     }
 
+    // Check if user already has 5 profiles
+    const existingProfileCount = await Profile.countDocuments({ userId });
+    if (existingProfileCount >= 5) {
+      logger.warn(`[PROFILE] Create profile failed - Maximum profiles reached for user: ${userId}`);
+      return sendError(res, 'Maximum of 5 profiles allowed per user', 400);
+    }
+
     // Create new profile
     const profile = new Profile({
       userId,
