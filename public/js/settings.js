@@ -1,11 +1,19 @@
 // Settings page functionality
 let profiles = [];
+let deleteModal;
+let profileToDelete = null;
 
 // Load user email and profiles on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadUserInfo();
     loadProfiles();
     setupEventListeners();
+
+    // Initialize Bootstrap modal
+    const deleteModalElement = document.getElementById('deleteModal');
+    if (deleteModalElement && typeof bootstrap !== 'undefined') {
+        deleteModal = new bootstrap.Modal(deleteModalElement);
+    }
 });
 
 function loadUserInfo() {
@@ -62,7 +70,7 @@ async function loadProfiles() {
 
 function renderProfiles() {
     const profilesGrid = document.getElementById('profilesGrid');
-    
+
     if (profiles.length === 0) {
         profilesGrid.innerHTML = `
             <div class="empty-state">
@@ -72,12 +80,20 @@ function renderProfiles() {
         `;
         return;
     }
-    
+
     profilesGrid.innerHTML = profiles.map(profile => `
         <div class="profile-card">
             <img src="./_images/profile/${profile.avatar}" alt="${profile.name}">
             <h4>${profile.name}</h4>
             <p>${profile.likes.length} likes</p>
+            <div class="profile-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="editProfile('${profile.id}')">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('${profile.id}', '${profile.name.replace(/'/g, "\\'")}')">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
         </div>
     `).join('');
 }
@@ -85,7 +101,13 @@ function renderProfiles() {
 function setupEventListeners() {
     // Add profile form submission
     document.getElementById('addProfileForm').addEventListener('submit', handleAddProfile);
-    
+
+    // Cancel edit button
+    document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+
+    // Confirm delete button
+    document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+
     // Logout button
     document.getElementById('logoutBtn').addEventListener('click', function(e) {
         e.preventDefault();
@@ -95,17 +117,18 @@ function setupEventListeners() {
 
 async function handleAddProfile(event) {
     event.preventDefault();
-    
+
     const profileName = document.getElementById('profileName');
     const avatarInputs = document.querySelectorAll('input[name="avatar"]');
     const submitBtn = document.getElementById('addProfileBtn');
-    
+    const editProfileId = document.getElementById('editProfileId').value;
+
     // Reset errors
     clearErrors();
-    
+
     // Validation
     let isValid = true;
-    
+
     if (!profileName.value.trim()) {
         showFieldError('profileName', 'Profile name is required');
         isValid = false;
@@ -113,73 +136,214 @@ async function handleAddProfile(event) {
         showFieldError('profileName', 'Profile name must be 20 characters or less');
         isValid = false;
     }
-    
+
     const selectedAvatar = Array.from(avatarInputs).find(input => input.checked);
     if (!selectedAvatar) {
         showFieldError('avatar', 'Please select an avatar');
         isValid = false;
     }
-    
+
     if (!isValid) return;
-    
+
     // Show loading state
-    setLoadingState(submitBtn, true);
-    
+    setLoadingState(submitBtn, true, editProfileId);
+
     try {
-        const userId = localStorage.getItem('userId');
-        const response = await fetch(`/api/users/${userId}/profiles`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                name: profileName.value.trim(),
-                avatar: selectedAvatar.value
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            // Success - show message and refresh profiles
-            showSuccessMessage('Profile created successfully!');
+        let response, data;
 
-            // If this is the first profile, automatically select it
-            if (profiles.length === 0) {
-                const newProfile = data.data;
-                localStorage.setItem('selectedProfileId', newProfile.id);
-                localStorage.setItem('selectedProfileName', newProfile.name);
-                localStorage.setItem('selectedProfileAvatar', newProfile.avatar);
+        if (editProfileId) {
+            // Update existing profile
+            response = await fetch(`/api/profiles/${editProfileId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: profileName.value.trim(),
+                    avatar: selectedAvatar.value
+                })
+            });
 
-                // Update profile image in header
-                const profileImage = document.getElementById('profileImage');
-                profileImage.src = `./_images/profile/${newProfile.avatar}`;
-            }
+            data = await response.json();
 
-            profileName.value = '';
-            selectedAvatar.checked = false;
+            if (response.ok) {
+                showSuccessMessage('Profile updated successfully!');
 
-            // Refresh profiles list
-            await loadProfiles();
-        } else {
-            // Handle server errors
-            if (data.details && Array.isArray(data.details)) {
-                data.details.forEach(error => {
-                    if (error.field === 'name') {
-                        showFieldError('profileName', error.message);
-                    } else if (error.field === 'avatar') {
-                        showFieldError('avatar', error.message);
-                    }
-                });
+                // Update localStorage if this is the currently selected profile
+                const selectedProfileId = localStorage.getItem('selectedProfileId');
+                if (selectedProfileId === editProfileId) {
+                    const updatedProfile = data.data;
+                    localStorage.setItem('selectedProfileName', updatedProfile.name);
+                    localStorage.setItem('selectedProfileAvatar', updatedProfile.avatar);
+
+                    // Update profile image in header
+                    const profileImage = document.getElementById('profileImage');
+                    profileImage.src = `./_images/profile/${updatedProfile.avatar}`;
+                }
+
+                // Reset form to add mode
+                cancelEdit();
+
+                // Refresh profiles list
+                await loadProfiles();
             } else {
-                showGeneralError(data.error || 'Failed to create profile. Please try again.');
+                handleErrors(data);
+            }
+        } else {
+            // Create new profile
+            const userId = localStorage.getItem('userId');
+            response = await fetch(`/api/users/${userId}/profiles`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: profileName.value.trim(),
+                    avatar: selectedAvatar.value
+                })
+            });
+
+            data = await response.json();
+
+            if (response.ok) {
+                showSuccessMessage('Profile created successfully!');
+
+                // If this is the first profile, automatically select it
+                if (profiles.length === 0) {
+                    const newProfile = data.data;
+                    localStorage.setItem('selectedProfileId', newProfile.id);
+                    localStorage.setItem('selectedProfileName', newProfile.name);
+                    localStorage.setItem('selectedProfileAvatar', newProfile.avatar);
+
+                    // Update profile image in header
+                    const profileImage = document.getElementById('profileImage');
+                    profileImage.src = `./_images/profile/${newProfile.avatar}`;
+                }
+
+                profileName.value = '';
+                selectedAvatar.checked = false;
+
+                // Refresh profiles list
+                await loadProfiles();
+            } else {
+                handleErrors(data);
             }
         }
     } catch (error) {
-        console.error('Add profile error:', error);
+        console.error('Profile operation error:', error);
         showGeneralError('Connection failed. Please check your internet connection and try again.');
     } finally {
-        setLoadingState(submitBtn, false);
+        setLoadingState(submitBtn, false, editProfileId);
+    }
+}
+
+function handleErrors(data) {
+    if (data.details && Array.isArray(data.details)) {
+        data.details.forEach(error => {
+            if (error.field === 'name') {
+                showFieldError('profileName', error.message);
+            } else if (error.field === 'avatar') {
+                showFieldError('avatar', error.message);
+            }
+        });
+    } else {
+        showGeneralError(data.error || 'Failed to save profile. Please try again.');
+    }
+}
+
+function editProfile(profileId) {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) return;
+
+    // Populate form with profile data
+    document.getElementById('editProfileId').value = profileId;
+    document.getElementById('profileName').value = profile.name;
+
+    // Select the appropriate avatar radio button
+    const avatarInput = document.querySelector(`input[name="avatar"][value="${profile.avatar}"]`);
+    if (avatarInput) {
+        avatarInput.checked = true;
+    }
+
+    // Update form title and button
+    document.getElementById('formTitle').textContent = 'Edit Profile';
+    document.getElementById('addProfileBtn').innerHTML = '<i class="bi bi-check-circle me-2"></i>Update Profile';
+    document.getElementById('cancelEditBtn').style.display = 'inline-block';
+
+    // Scroll to form
+    document.getElementById('addProfileForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cancelEdit() {
+    // Reset form
+    document.getElementById('editProfileId').value = '';
+    document.getElementById('profileName').value = '';
+    const avatarInputs = document.querySelectorAll('input[name="avatar"]');
+    avatarInputs.forEach(input => input.checked = false);
+
+    // Reset form title and button
+    document.getElementById('formTitle').textContent = 'Add New Profile';
+    document.getElementById('addProfileBtn').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add Profile';
+    document.getElementById('cancelEditBtn').style.display = 'none';
+
+    // Clear errors
+    clearErrors();
+}
+
+function showDeleteConfirmation(profileId, profileName) {
+    profileToDelete = profileId;
+    document.getElementById('deleteProfileName').textContent = profileName;
+    if (deleteModal) {
+        deleteModal.show();
+    }
+}
+
+async function confirmDelete() {
+    if (!profileToDelete) return;
+
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const originalContent = confirmBtn.innerHTML;
+
+    try {
+        // Show loading state
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Deleting...';
+
+        const response = await fetch(`/api/profiles/${profileToDelete}`, {
+            method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            // Hide modal
+            if (deleteModal) {
+                deleteModal.hide();
+            }
+
+            showSuccessMessage('Profile deleted successfully!');
+
+            // If the deleted profile was the selected one, clear selection
+            const selectedProfileId = localStorage.getItem('selectedProfileId');
+            if (selectedProfileId === profileToDelete) {
+                localStorage.removeItem('selectedProfileId');
+                localStorage.removeItem('selectedProfileName');
+                localStorage.removeItem('selectedProfileAvatar');
+            }
+
+            // Refresh profiles list
+            await loadProfiles();
+
+            profileToDelete = null;
+        } else {
+            showGeneralError(data.error || 'Failed to delete profile. Please try again.');
+        }
+    } catch (error) {
+        console.error('Delete profile error:', error);
+        showGeneralError('Connection failed. Please check your internet connection and try again.');
+    } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = originalContent;
     }
 }
 
@@ -250,14 +414,18 @@ function showSuccessMessage(message) {
     }, 3000);
 }
 
-function setLoadingState(button, isLoading) {
+function setLoadingState(button, isLoading, isEdit) {
     if (isLoading) {
         button.disabled = true;
-        button.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Creating...';
+        button.innerHTML = isEdit
+            ? '<i class="bi bi-arrow-clockwise me-2"></i>Updating...'
+            : '<i class="bi bi-arrow-clockwise me-2"></i>Creating...';
         button.classList.add('loading');
     } else {
         button.disabled = false;
-        button.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Add Profile';
+        button.innerHTML = isEdit
+            ? '<i class="bi bi-check-circle me-2"></i>Update Profile'
+            : '<i class="bi bi-plus-circle me-2"></i>Add Profile';
         button.classList.remove('loading');
     }
 }

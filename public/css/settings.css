@@ -61,7 +61,6 @@ body {
     text-align: center;
     border: 2px solid transparent;
     transition: all 0.3s ease;
-    cursor: pointer;
 }
 
 .profile-card:hover {
@@ -87,7 +86,69 @@ body {
 .profile-card p {
     color: #8c8c8c;
     font-size: 0.9rem;
-    margin: 0;
+    margin: 0 0 15px 0;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.profile-actions .btn {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+}
+
+.btn-outline-primary {
+    border: 1px solid #e50914;
+    color: #e50914;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: #e50914;
+    color: white;
+}
+
+.btn-outline-danger {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background: transparent;
+}
+
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    border: none;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.modal-content {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: white;
+}
+
+.modal-header {
+    border-bottom: 1px solid #333;
+}
+
+.modal-footer {
+    border-top: 1px solid #333;
+}
+
+.btn-close {
+    filter: invert(1);
 }
 
 .avatar-selection {
