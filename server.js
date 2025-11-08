@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const connectDB = require('./src/config/db');
+const logger = require('./src/utils/logger');
 const { seedContent } = require('./src/utils/seedContent');
 const app = express();
 
