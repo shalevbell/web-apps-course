@@ -61,11 +61,29 @@ body {
     text-align: center;
     border: 2px solid transparent;
     transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
 }
 
 .profile-card:hover {
     border-color: #e50914;
     transform: translateY(-2px);
+}
+
+.profile-card.selected {
+    border-color: #e50914;
+    background: #333;
+}
+
+.selected-badge {
+    color: #e50914;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 10px 0 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
 }
 
 .profile-card img {

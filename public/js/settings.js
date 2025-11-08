@@ -70,6 +70,7 @@ async function loadProfiles() {
 
 function renderProfiles() {
     const profilesGrid = document.getElementById('profilesGrid');
+    const selectedProfileId = localStorage.getItem('selectedProfileId');
 
     if (profiles.length === 0) {
         profilesGrid.innerHTML = `
@@ -81,21 +82,42 @@ function renderProfiles() {
         return;
     }
 
-    profilesGrid.innerHTML = profiles.map(profile => `
-        <div class="profile-card">
-            <img src="./_images/profile/${profile.avatar}" alt="${profile.name}">
-            <h4>${profile.name}</h4>
-            <p>${profile.likes.length} likes</p>
-            <div class="profile-actions">
-                <button class="btn btn-sm btn-outline-primary" onclick="editProfile('${profile.id}')">
-                    <i class="bi bi-pencil"></i> Edit
-                </button>
-                <button class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('${profile.id}', '${profile.name.replace(/'/g, "\\'")}')">
-                    <i class="bi bi-trash"></i> Delete
-                </button>
+    profilesGrid.innerHTML = profiles.map(profile => {
+        const isSelected = profile.id === selectedProfileId;
+        return `
+            <div class="profile-card ${isSelected ? 'selected' : ''}" onclick="selectProfile('${profile.id}', '${profile.name.replace(/'/g, "\\'")}', '${profile.avatar}')">
+                <img src="./_images/profile/${profile.avatar}" alt="${profile.name}">
+                <h4>${profile.name}</h4>
+                <p>${profile.likes.length} likes</p>
+                ${isSelected ? '<div class="selected-badge"><i class="bi bi-check-circle-fill"></i> Active</div>' : ''}
+                <div class="profile-actions" onclick="event.stopPropagation()">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editProfile('${profile.id}')">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="showDeleteConfirmation('${profile.id}', '${profile.name.replace(/'/g, "\\'")}')">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+}
+
+function selectProfile(profileId, profileName, profileAvatar) {
+    // Update localStorage
+    localStorage.setItem('selectedProfileId', profileId);
+    localStorage.setItem('selectedProfileName', profileName);
+    localStorage.setItem('selectedProfileAvatar', profileAvatar);
+
+    // Update profile image in header
+    const profileImage = document.getElementById('profileImage');
+    profileImage.src = `./_images/profile/${profileAvatar}`;
+
+    // Re-render profiles to show selected state
+    renderProfiles();
+
+    // Show success message
+    showSuccessMessage(`Switched to profile: ${profileName}`);
 }
 
 function setupEventListeners() {
