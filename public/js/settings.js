@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserInfo();
     loadProfiles();
     setupEventListeners();
+    // Initial form state will be set after profiles load
 });
 
 function loadUserInfo() {
@@ -50,6 +51,7 @@ async function loadProfiles() {
         if (response.ok) {
             profiles = data.data;
             renderProfiles();
+            updateAddProfileFormState();
         } else {
             console.error('Failed to load profiles:', data.error);
             showError('Failed to load profiles. Please try again.');
@@ -62,6 +64,13 @@ async function loadProfiles() {
 
 function renderProfiles() {
     const profilesGrid = document.getElementById('profilesGrid');
+    const profilesCard = profilesGrid.closest('.settings-card');
+    const cardTitle = profilesCard ? profilesCard.querySelector('.card-title') : null;
+    
+    // Update card title with profile count
+    if (cardTitle) {
+        cardTitle.innerHTML = `Your Profiles <span class="profile-count">(${profiles.length}/5)</span>`;
+    }
     
     if (profiles.length === 0) {
         profilesGrid.innerHTML = `
@@ -74,7 +83,15 @@ function renderProfiles() {
     }
     
     profilesGrid.innerHTML = profiles.map(profile => `
-        <div class="profile-card">
+        <div class="profile-card" data-profile-id="${profile.id}">
+            <div class="profile-card-actions">
+                <button class="btn-action btn-edit" onclick="openEditModal('${profile.id}')" title="Edit profile">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn-action btn-delete" onclick="handleDeleteProfile('${profile.id}')" title="Delete profile">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
             <img src="./_images/profile/${profile.avatar}" alt="${profile.name}">
             <h4>${profile.name}</h4>
             <p>${profile.likes.length} likes</p>
@@ -85,6 +102,9 @@ function renderProfiles() {
 function setupEventListeners() {
     // Add profile form submission
     document.getElementById('addProfileForm').addEventListener('submit', handleAddProfile);
+    
+    // Edit profile form submission
+    document.getElementById('saveProfileBtn').addEventListener('click', handleEditProfile);
     
     // Logout button
     document.getElementById('logoutBtn').addEventListener('click', function(e) {
@@ -102,6 +122,12 @@ async function handleAddProfile(event) {
     
     // Reset errors
     clearErrors();
+    
+    // Check profile limit (max 5 profiles)
+    if (profiles.length >= 5) {
+        showGeneralError('Maximum of 5 profiles allowed. Please delete a profile before creating a new one.');
+        return;
+    }
     
     // Validation
     let isValid = true;
@@ -172,7 +198,13 @@ async function handleAddProfile(event) {
                     }
                 });
             } else {
-                showGeneralError(data.error || 'Failed to create profile. Please try again.');
+                // Check if it's a profile limit error
+                if (data.error && data.error.includes('Maximum of 5 profiles')) {
+                    showGeneralError('Maximum of 5 profiles allowed. Please delete a profile before creating a new one.');
+                    updateAddProfileFormState();
+                } else {
+                    showGeneralError(data.error || 'Failed to create profile. Please try again.');
+                }
             }
         }
     } catch (error) {
@@ -271,4 +303,279 @@ function showError(message) {
             <button onclick="loadProfiles()" class="btn btn-primary">Retry</button>
         </div>
     `;
+}
+
+function openEditModal(profileId) {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) {
+        console.error('Profile not found:', profileId);
+        return;
+    }
+
+    // Set profile ID
+    document.getElementById('editProfileId').value = profileId;
+    
+    // Set profile name
+    document.getElementById('editProfileName').value = profile.name;
+    
+    // Set avatar selection
+    const avatarInputs = document.querySelectorAll('input[name="editAvatar"]');
+    avatarInputs.forEach(input => {
+        input.checked = input.value === profile.avatar;
+    });
+
+    // Clear errors
+    clearEditErrors();
+
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+    modal.show();
+}
+
+async function handleEditProfile() {
+    const profileId = document.getElementById('editProfileId').value;
+    const profileName = document.getElementById('editProfileName');
+    const avatarInputs = document.querySelectorAll('input[name="editAvatar"]');
+    const submitBtn = document.getElementById('saveProfileBtn');
+    
+    // Reset errors
+    clearEditErrors();
+    
+    // Validation
+    let isValid = true;
+    
+    if (!profileName.value.trim()) {
+        showEditFieldError('editProfileName', 'Profile name is required');
+        isValid = false;
+    } else if (profileName.value.trim().length > 20) {
+        showEditFieldError('editProfileName', 'Profile name must be 20 characters or less');
+        isValid = false;
+    }
+    
+    const selectedAvatar = Array.from(avatarInputs).find(input => input.checked);
+    if (!selectedAvatar) {
+        showEditFieldError('editAvatar', 'Please select an avatar');
+        isValid = false;
+    }
+    
+    if (!isValid) return;
+    
+    // Show loading state
+    setEditLoadingState(submitBtn, true);
+    
+    try {
+        const userId = localStorage.getItem('userId');
+        const response = await fetch(`/api/profiles/${profileId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: userId,
+                name: profileName.value.trim(),
+                avatar: selectedAvatar.value
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Success - close modal and refresh profiles
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+            modal.hide();
+            
+            showSuccessMessage('Profile updated successfully!');
+
+            // Update localStorage if this is the selected profile
+            const selectedProfileId = localStorage.getItem('selectedProfileId');
+            if (selectedProfileId === profileId) {
+                localStorage.setItem('selectedProfileName', data.data.name);
+                localStorage.setItem('selectedProfileAvatar', data.data.avatar);
+                
+                // Update profile image in header
+                const profileImage = document.getElementById('profileImage');
+                profileImage.src = `./_images/profile/${data.data.avatar}`;
+            }
+
+            // Refresh profiles list
+            await loadProfiles();
+        } else {
+            // Handle server errors
+            if (data.details && Array.isArray(data.details)) {
+                data.details.forEach(error => {
+                    if (error.field === 'name') {
+                        showEditFieldError('editProfileName', error.message);
+                    } else if (error.field === 'avatar') {
+                        showEditFieldError('editAvatar', error.message);
+                    }
+                });
+            } else {
+                showEditGeneralError(data.error || 'Failed to update profile. Please try again.');
+            }
+        }
+    } catch (error) {
+        console.error('Edit profile error:', error);
+        showEditGeneralError('Connection failed. Please check your internet connection and try again.');
+    } finally {
+        setEditLoadingState(submitBtn, false);
+    }
+}
+
+async function handleDeleteProfile(profileId) {
+    const profile = profiles.find(p => p.id === profileId);
+    if (!profile) {
+        console.error('Profile not found:', profileId);
+        return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = confirm(`Are you sure you want to delete the profile "${profile.name}"? This action cannot be undone.`);
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+        const userId = localStorage.getItem('userId');
+        const response = await fetch(`/api/profiles/${profileId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                userId: userId
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Success - show message and refresh profiles
+            showSuccessMessage('Profile deleted successfully!');
+
+            // Clear localStorage if deleted profile was selected
+            const selectedProfileId = localStorage.getItem('selectedProfileId');
+            if (selectedProfileId === profileId) {
+                localStorage.removeItem('selectedProfileId');
+                localStorage.removeItem('selectedProfileName');
+                localStorage.removeItem('selectedProfileAvatar');
+                
+                // Update profile image in header to default
+                const profileImage = document.getElementById('profileImage');
+                profileImage.src = `./_images/profile/profile_pic_default.png`;
+            }
+
+            // Refresh profiles list
+            await loadProfiles();
+        } else {
+            // Handle server errors
+            alert(data.error || 'Failed to delete profile. Please try again.');
+        }
+    } catch (error) {
+        console.error('Delete profile error:', error);
+        alert('Connection failed. Please check your internet connection and try again.');
+    }
+}
+
+function clearEditErrors() {
+    const errorFields = ['editProfileName', 'editAvatar'];
+    errorFields.forEach(field => {
+        const errorElement = document.getElementById(field + 'Error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+            errorElement.textContent = '';
+        }
+    });
+    
+    // Clear general error
+    const generalError = document.getElementById('editGeneralError');
+    if (generalError) {
+        generalError.remove();
+    }
+    
+    // Remove invalid class from inputs
+    const nameInput = document.getElementById('editProfileName');
+    if (nameInput) {
+        nameInput.classList.remove('is-invalid');
+    }
+}
+
+function showEditFieldError(fieldName, message) {
+    const errorElement = document.getElementById(fieldName + 'Error');
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+    
+    const inputElement = document.getElementById(fieldName);
+    if (inputElement) {
+        inputElement.classList.add('is-invalid');
+    }
+}
+
+function showEditGeneralError(message) {
+    const form = document.getElementById('editProfileForm');
+    let errorDiv = document.getElementById('editGeneralError');
+    
+    if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.id = 'editGeneralError';
+        errorDiv.className = 'error-message';
+        errorDiv.style.textAlign = 'center';
+        errorDiv.style.marginBottom = '20px';
+        form.insertBefore(errorDiv, form.firstChild);
+    }
+    
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+}
+
+function setEditLoadingState(button, isLoading) {
+    if (isLoading) {
+        button.disabled = true;
+        button.innerHTML = '<i class="bi bi-arrow-clockwise me-2"></i>Saving...';
+        button.classList.add('loading');
+    } else {
+        button.disabled = false;
+        button.innerHTML = '<i class="bi bi-check-circle me-2"></i>Save Changes';
+        button.classList.remove('loading');
+    }
+}
+
+function updateAddProfileFormState() {
+    const addProfileForm = document.getElementById('addProfileForm');
+    const profileNameInput = document.getElementById('profileName');
+    const avatarInputs = document.querySelectorAll('input[name="avatar"]');
+    const addProfileBtn = document.getElementById('addProfileBtn');
+    const addProfileCard = addProfileForm.closest('.settings-card');
+    
+    // Remove existing limit message if any
+    const existingLimitMsg = addProfileCard.querySelector('.profile-limit-message');
+    if (existingLimitMsg) {
+        existingLimitMsg.remove();
+    }
+    
+    if (profiles.length >= 5) {
+        // Disable form inputs
+        profileNameInput.disabled = true;
+        avatarInputs.forEach(input => input.disabled = true);
+        addProfileBtn.disabled = true;
+        addProfileBtn.classList.add('disabled');
+        
+        // Add limit message
+        const limitMsg = document.createElement('div');
+        limitMsg.className = 'profile-limit-message';
+        limitMsg.innerHTML = `
+            <div class="alert alert-warning mt-3 mb-0" style="background: #ffc107; color: #000; border: none; border-radius: 4px; padding: 12px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Profile Limit Reached:</strong> You have reached the maximum of 5 profiles. Please delete a profile to create a new one.
+            </div>
+        `;
+        addProfileForm.appendChild(limitMsg);
+    } else {
+        // Enable form inputs
+        profileNameInput.disabled = false;
+        avatarInputs.forEach(input => input.disabled = false);
+        addProfileBtn.disabled = false;
+        addProfileBtn.classList.remove('disabled');
+    }
 }

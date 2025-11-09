@@ -63,7 +63,7 @@ const startServer = async () => {
       await seedContent();
     }
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log('='.repeat(50));
       console.log(`Web Apps Course Netflix Clone Server`);
       console.log(`Server running on port ${PORT}`);
@@ -73,6 +73,22 @@ const startServer = async () => {
 
       logger.info(`[SERVER] Server started on port ${PORT}`);
       logger.info(`[SERVER] Database connection: ${dbConnected ? 'connected' : 'not connected'}`);
+    });
+
+    // Handle server errors (e.g., port already in use)
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        logger.error(`[SERVER] Port ${PORT} is already in use. Please stop the other process or use a different port.`);
+        console.error(`\nError: Port ${PORT} is already in use.`);
+        console.error(`   Please stop the process using port ${PORT} or set a different PORT in your .env file.`);
+        console.error(`   On Windows, you can find the process with: netstat -ano | findstr :${PORT}`);
+        console.error(`   Then kill it with: taskkill /PID <PID> /F\n`);
+        process.exit(1);
+      } else {
+        logger.error(`[SERVER] Server error: ${err.message}`);
+        console.error(`Server error: ${err.message}`);
+        process.exit(1);
+      }
     });
   } catch (error) {
     logger.error(`[SERVER] Failed to start server: ${error.message}`);
