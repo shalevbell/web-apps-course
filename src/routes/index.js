@@ -6,6 +6,7 @@ const router = express.Router();
 // Import controllers
 const authController = require('../controllers/authController');
 const profileController = require('../controllers/profileController');
+const viewingHistoryController = require('../controllers/viewingHistoryController');
 const validateRequest = require('../middleware/validateRequest');
 
 // Import models
@@ -138,5 +139,35 @@ router.post('/profiles/:profileId/unlike', [
 
 // Get global like counts
 router.get('/content/likes', profileController.getGlobalLikeCounts);
+
+// ============================================
+// Viewing History Routes
+// ============================================
+
+// Get all viewing history for a profile
+router.get('/profiles/:profileId/viewing-history', viewingHistoryController.getProfileHistory);
+
+// Get viewing progress for specific content
+router.get('/profiles/:profileId/viewing-history/:contentId', viewingHistoryController.getProgress);
+
+// Save viewing progress
+router.post('/profiles/:profileId/viewing-history', [
+  body('contentId')
+    .isNumeric()
+    .withMessage('Content ID must be a number'),
+  body('currentTime')
+    .isNumeric()
+    .withMessage('Current time must be a number'),
+  body('duration')
+    .isNumeric()
+    .withMessage('Duration must be a number'),
+  body('completed')
+    .isBoolean()
+    .optional()
+    .withMessage('Completed must be a boolean')
+], validateRequest, viewingHistoryController.saveProgress);
+
+// Delete viewing history
+router.delete('/profiles/:profileId/viewing-history/:contentId', viewingHistoryController.deleteProgress);
 
 module.exports = router;
