@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix - Player</title>
+    <link rel="shortcut icon" href="./_images/netflix_assets/netflix_favicon.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/player.css">
+</head>
+<body>
+    <!-- Video Player Container -->
+    <div class="player-container">
+        <!-- Back Button -->
+        <div class="back-button-container">
+            <button id="backBtn" class="back-btn">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to Browse</span>
+            </button>
+        </div>
+
+        <!-- Video Element -->
+        <div class="video-wrapper">
+            <video id="videoPlayer" class="video-element" preload="metadata">
+                <source id="videoSource" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner">
+                <div class="spinner-border text-danger" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Video Controls Overlay -->
+            <div id="controlsOverlay" class="controls-overlay">
+                <!-- Top Controls -->
+                <div class="top-controls">
+                    <div class="content-info">
+                        <h2 id="contentTitle" class="content-title"></h2>
+                        <p id="contentDescription" class="content-description"></p>
+                    </div>
+                </div>
+
+                <!-- Center Play/Pause Button -->
+                <div class="center-controls">
+                    <button id="centerPlayBtn" class="center-play-btn">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+
+                <!-- Bottom Controls -->
+                <div class="bottom-controls">
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <input type="range" id="progressBar" class="progress-bar" min="0" max="100" value="0" step="0.1">
+                        <div id="progressFilled" class="progress-filled"></div>
+                    </div>
+
+                    <!-- Control Buttons and Info -->
+                    <div class="controls-row">
+                        <div class="controls-left">
+                            <button id="playPauseBtn" class="control-btn">
+                                <i class="bi bi-play-fill"></i>
+                            </button>
+                            <button id="rewindBtn" class="control-btn" title="Rewind 10 seconds">
+                                <i class="bi bi-skip-backward-fill"></i>
+                                <span class="skip-label">10</span>
+                            </button>
+                            <button id="forwardBtn" class="control-btn" title="Forward 10 seconds">
+                                <i class="bi bi-skip-forward-fill"></i>
+                                <span class="skip-label">10</span>
+                            </button>
+                            <div class="volume-control">
+                                <button id="volumeBtn" class="control-btn">
+                                    <i class="bi bi-volume-up-fill"></i>
+                                </button>
+                                <input type="range" id="volumeSlider" class="volume-slider" min="0" max="100" value="100">
+                            </div>
+                            <div class="time-display">
+                                <span id="currentTime">0:00</span>
+                                <span class="time-separator">/</span>
+                                <span id="duration">0:00</span>
+                            </div>
+                        </div>
+
+                        <div class="controls-right">
+                            <button id="episodesBtn" class="control-btn" title="Episodes" style="display: none;">
+                                <i class="bi bi-list-ul"></i>
+                            </button>
+                            <button id="subtitlesBtn" class="control-btn" title="Subtitles">
+                                <i class="bi bi-badge-cc"></i>
+                            </button>
+                            <button id="settingsBtn" class="control-btn" title="Settings">
+                                <i class="bi bi-gear"></i>
+                            </button>
+                            <button id="fullscreenBtn" class="control-btn" title="Fullscreen">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="error-message" style="display: none;">
+            <div class="error-content">
+                <i class="bi bi-exclamation-triangle"></i>
+                <h3>Video Unavailable</h3>
+                <p id="errorText">This video is currently unavailable. Please try again later.</p>
+                <button id="errorBackBtn" class="btn btn-danger">Back to Browse</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Auth Check -->
+    <script src="./js/auth.js"></script>
+    <!-- Player JS -->
+    <script src="./js/player.js"></script>
+</body>
+</html>
