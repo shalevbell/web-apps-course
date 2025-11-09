@@ -132,10 +132,10 @@ function renderHeroSection() {
             <h1 class="hero-title">${heroContent.name}</h1>
             <p class="hero-description">${heroContent.description}</p>
             <div class="hero-buttons">
-                <button class="btn-play">
+                <button class="btn-play" data-content-id="${heroContent.id}">
                     <i class="bi bi-play-fill me-1"></i>Play
                 </button>
-                <button class="btn-info">
+                <button class="btn-info" data-content-id="${heroContent.id}">
                     <i class="bi bi-info-circle me-1"></i>Info
                 </button>
             </div>
@@ -143,6 +143,23 @@ function renderHeroSection() {
     `;
 
     heroSection.innerHTML = heroHTML;
+
+    // Add event listeners to hero buttons
+    const playBtn = heroSection.querySelector('.btn-play');
+    const infoBtn = heroSection.querySelector('.btn-info');
+
+    if (playBtn) {
+        playBtn.addEventListener('click', () => {
+            window.location.href = `player.html?contentId=${heroContent.id}`;
+        });
+    }
+
+    if (infoBtn) {
+        infoBtn.addEventListener('click', () => {
+            // For now, also navigate to player (could be a details page in future)
+            window.location.href = `player.html?contentId=${heroContent.id}`;
+        });
+    }
 }
 
 // Function to render content sections
@@ -448,13 +465,17 @@ function setupSortButton() {
 
 // Function to handle content item clicks
 function handleContentClick(event) {
-    // Ignore clicks on like buttons
-    if (event.target.closest('.like-btn')) return;
+    // Ignore clicks on like buttons and like container
+    if (event.target.closest('.like-btn') || event.target.closest('.like-container')) {
+        return;
+    }
 
     const contentItem = event.currentTarget;
+    const contentId = contentItem.getAttribute('data-id');
     const contentTitle = contentItem.getAttribute('data-title');
-    const contentType = contentItem.getAttribute('data-type');
 
-    console.log(`Playing: ${contentTitle} (${contentType})`);
-    alert(`Playing: ${contentTitle} (${contentType})`);
+    console.log(`Playing: ${contentTitle} (ID: ${contentId})`);
+
+    // Navigate to video player
+    window.location.href = `player.html?contentId=${contentId}`;
 }
