@@ -81,8 +81,10 @@ const startServer = async () => {
         logger.error(`[SERVER] Port ${PORT} is already in use. Please stop the other process or use a different port.`);
         console.error(`\nError: Port ${PORT} is already in use.`);
         console.error(`   Please stop the process using port ${PORT} or set a different PORT in your .env file.`);
-        console.error(`   On Windows, you can find the process with: netstat -ano | findstr :${PORT}`);
-        console.error(`   Then kill it with: taskkill /PID <PID> /F\n`);
+        console.error(`\n   To find and kill the process:`);
+        console.error(`   - macOS/Linux: lsof -ti :${PORT} | xargs kill -9`);
+        console.error(`   - Linux (alternative): sudo fuser -k ${PORT}/tcp`);
+        console.error(`   - Windows: netstat -ano | findstr :${PORT}, then taskkill /PID <PID> /F\n`);
         process.exit(1);
       } else {
         logger.error(`[SERVER] Server error: ${err.message}`);
