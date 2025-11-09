@@ -173,11 +173,111 @@ const getGlobalLikeCounts = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+    const { userId, name, avatar } = req.body;
+
+    // Verify user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      logger.warn(`[PROFILE] Update profile failed - User not found: ${userId}`);
+      return sendError(res, 'User not found', 404);
+    }
+
+    // Find profile and verify it exists
+    const profile = await Profile.findById(profileId);
+    if (!profile) {
+      logger.warn(`[PROFILE] Update profile failed - Profile not found: ${profileId}`);
+      return sendError(res, 'Profile not found', 404);
+    }
+
+    // Verify profile belongs to user
+    if (profile.userId.toString() !== userId) {
+      logger.warn(`[PROFILE] Update profile failed - Unauthorized: profile ${profileId} does not belong to user ${userId}`);
+      return sendError(res, 'Unauthorized: Profile does not belong to this user', 403);
+    }
+
+    // Update profile fields if provided
+    if (name !== undefined) {
+      profile.name = name.trim();
+    }
+    if (avatar !== undefined) {
+      profile.avatar = avatar;
+    }
+
+    // Save updated profile
+    await profile.save();
+
+    // Return updated profile data (without userId)
+    const profileData = {
+      id: profile._id,
+      name: profile.name,
+      avatar: profile.avatar,
+      likes: profile.likes
+    };
+
+    logger.info(`[PROFILE] Profile updated: ${profile.name} (${profileId}) for user ${user.email}`);
+    sendSuccess(res, profileData, 'Profile updated successfully');
+  } catch (error) {
+    logger.error(`[PROFILE] Update profile error: ${error.message}`);
+    console.error('Update profile error:', error);
+
+    if (error.code === 11000) {
+      return sendError(res, 'Profile name already exists for this user', 409);
+    }
+
+    sendError(res, 'Server error updating profile', 500);
+  }
+};
+
+const deleteProfile = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+    const { userId } = req.body;
+
+    // Verify user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      logger.warn(`[PROFILE] Delete profile failed - User not found: ${userId}`);
+      return sendError(res, 'User not found', 404);
+    }
+
+    // Find profile and verify it exists
+    const profile = await Profile.findById(profileId);
+    if (!profile) {
+      logger.warn(`[PROFILE] Delete profile failed - Profile not found: ${profileId}`);
+      return sendError(res, 'Profile not found', 404);
+    }
+
+    // Verify profile belongs to user
+    if (profile.userId.toString() !== userId) {
+      logger.warn(`[PROFILE] Delete profile failed - Unauthorized: profile ${profileId} does not belong to user ${userId}`);
+      return sendError(res, 'Unauthorized: Profile does not belong to this user', 403);
+    }
+
+    // Store profile name for logging
+    const profileName = profile.name;
+
+    // Delete profile
+    await Profile.findByIdAndDelete(profileId);
+
+    logger.info(`[PROFILE] Profile deleted: ${profileName} (${profileId}) for user ${user.email}`);
+    sendSuccess(res, null, 'Profile deleted successfully');
+  } catch (error) {
+    logger.error(`[PROFILE] Delete profile error: ${error.message}`);
+    console.error('Delete profile error:', error);
+    sendError(res, 'Server error deleting profile', 500);
+  }
+};
+
 module.exports = {
   getProfiles,
   createProfile,
   getLikes,
   likeContent,
   unlikeContent,
-  getGlobalLikeCounts
+  getGlobalLikeCounts,
+  updateProfile,
+  deleteProfile
 };

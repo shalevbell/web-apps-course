@@ -62,11 +62,58 @@ body {
     border: 2px solid transparent;
     transition: all 0.3s ease;
     cursor: pointer;
+    position: relative;
 }
 
 .profile-card:hover {
     border-color: #e50914;
     transform: translateY(-2px);
+}
+
+.profile-card-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-card:hover .profile-card-actions {
+    opacity: 1;
+}
+
+.btn-action {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    font-size: 14px;
+}
+
+.btn-action:hover {
+    background: rgba(229, 9, 20, 0.9);
+    border-color: #e50914;
+    transform: scale(1.1);
+}
+
+.btn-action.btn-edit:hover {
+    background: rgba(0, 123, 255, 0.9);
+    border-color: #007bff;
+}
+
+.btn-action.btn-delete:hover {
+    background: rgba(220, 53, 69, 0.9);
+    border-color: #dc3545;
 }
 
 .profile-card img {
@@ -319,6 +366,53 @@ body {
     color: #e50914;
 }
 
+/* Modal styles */
+.modal-content {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #333;
+    padding: 20px;
+}
+
+.modal-title {
+    color: white;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 20px;
+    color: white;
+}
+
+.modal-footer {
+    border-top: 1px solid #333;
+    padding: 20px;
+}
+
+.btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.btn-secondary {
+    background: #555;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #666;
+    color: white;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .profiles-grid {
@@ -336,5 +430,9 @@ body {
     
     .page-title {
         font-size: 2rem;
+    }
+
+    .profile-card-actions {
+        opacity: 1;
     }
 }

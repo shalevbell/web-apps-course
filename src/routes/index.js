@@ -96,6 +96,29 @@ router.post('/users/:userId/profiles', [
     .withMessage('Invalid avatar selection')
 ], validateRequest, profileController.createProfile);
 
+// Update profile
+router.put('/profiles/:profileId', [
+  body('name')
+    .isLength({ min: 1, max: 20 })
+    .withMessage('Profile name must be between 1 and 20 characters')
+    .trim()
+    .optional(),
+  body('avatar')
+    .isIn(['profile_pic_1.png', 'profile_pic_2.png', 'profile_pic_3.png', 'profile_pic_4.png'])
+    .withMessage('Invalid avatar selection')
+    .optional(),
+  body('userId')
+    .notEmpty()
+    .withMessage('User ID is required')
+], validateRequest, profileController.updateProfile);
+
+// Delete profile
+router.delete('/profiles/:profileId', [
+  body('userId')
+    .notEmpty()
+    .withMessage('User ID is required')
+], validateRequest, profileController.deleteProfile);
+
 // Get profile likes
 router.get('/profiles/:profileId/likes', profileController.getLikes);
 
