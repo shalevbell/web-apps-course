@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserInfo();
     loadProfiles();
     setupEventListeners();
+    // Initial form state will be set after profiles load
 });
 
 function loadUserInfo() {
@@ -50,6 +51,7 @@ async function loadProfiles() {
         if (response.ok) {
             profiles = data.data;
             renderProfiles();
+            updateAddProfileFormState();
         } else {
             console.error('Failed to load profiles:', data.error);
             showError('Failed to load profiles. Please try again.');
@@ -62,6 +64,13 @@ async function loadProfiles() {
 
 function renderProfiles() {
     const profilesGrid = document.getElementById('profilesGrid');
+    const profilesCard = profilesGrid.closest('.settings-card');
+    const cardTitle = profilesCard ? profilesCard.querySelector('.card-title') : null;
+    
+    // Update card title with profile count
+    if (cardTitle) {
+        cardTitle.innerHTML = `Your Profiles <span class="profile-count">(${profiles.length}/5)</span>`;
+    }
     
     if (profiles.length === 0) {
         profilesGrid.innerHTML = `
@@ -113,6 +122,12 @@ async function handleAddProfile(event) {
     
     // Reset errors
     clearErrors();
+    
+    // Check profile limit (max 5 profiles)
+    if (profiles.length >= 5) {
+        showGeneralError('Maximum of 5 profiles allowed. Please delete a profile before creating a new one.');
+        return;
+    }
     
     // Validation
     let isValid = true;
@@ -183,7 +198,13 @@ async function handleAddProfile(event) {
                     }
                 });
             } else {
-                showGeneralError(data.error || 'Failed to create profile. Please try again.');
+                // Check if it's a profile limit error
+                if (data.error && data.error.includes('Maximum of 5 profiles')) {
+                    showGeneralError('Maximum of 5 profiles allowed. Please delete a profile before creating a new one.');
+                    updateAddProfileFormState();
+                } else {
+                    showGeneralError(data.error || 'Failed to create profile. Please try again.');
+                }
             }
         }
     } catch (error) {
@@ -517,5 +538,44 @@ function setEditLoadingState(button, isLoading) {
         button.disabled = false;
         button.innerHTML = '<i class="bi bi-check-circle me-2"></i>Save Changes';
         button.classList.remove('loading');
+    }
+}
+
+function updateAddProfileFormState() {
+    const addProfileForm = document.getElementById('addProfileForm');
+    const profileNameInput = document.getElementById('profileName');
+    const avatarInputs = document.querySelectorAll('input[name="avatar"]');
+    const addProfileBtn = document.getElementById('addProfileBtn');
+    const addProfileCard = addProfileForm.closest('.settings-card');
+    
+    // Remove existing limit message if any
+    const existingLimitMsg = addProfileCard.querySelector('.profile-limit-message');
+    if (existingLimitMsg) {
+        existingLimitMsg.remove();
+    }
+    
+    if (profiles.length >= 5) {
+        // Disable form inputs
+        profileNameInput.disabled = true;
+        avatarInputs.forEach(input => input.disabled = true);
+        addProfileBtn.disabled = true;
+        addProfileBtn.classList.add('disabled');
+        
+        // Add limit message
+        const limitMsg = document.createElement('div');
+        limitMsg.className = 'profile-limit-message';
+        limitMsg.innerHTML = `
+            <div class="alert alert-warning mt-3 mb-0" style="background: #ffc107; color: #000; border: none; border-radius: 4px; padding: 12px;">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Profile Limit Reached:</strong> You have reached the maximum of 5 profiles. Please delete a profile to create a new one.
+            </div>
+        `;
+        addProfileForm.appendChild(limitMsg);
+    } else {
+        // Enable form inputs
+        profileNameInput.disabled = false;
+        avatarInputs.forEach(input => input.disabled = false);
+        addProfileBtn.disabled = false;
+        addProfileBtn.classList.remove('disabled');
     }
 }
