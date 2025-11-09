@@ -81,9 +81,26 @@ async function initializePlayer() {
             return;
         }
 
+        // Determine if videoUrl is a full URL or a local path
+        let videoSrc;
+        if (content.videoUrl.startsWith('http://') || content.videoUrl.startsWith('https://')) {
+            // It's a full URL, use as-is
+            videoSrc = content.videoUrl;
+            console.log('Using external URL:', videoSrc);
+        } else {
+            // It's a local path relative to public directory
+            // Ensure path starts with ./ for consistency with other assets
+            if (!content.videoUrl.startsWith('./') && !content.videoUrl.startsWith('/')) {
+                videoSrc = `./_videos/${content.videoUrl}`;
+            } else {
+                videoSrc = content.videoUrl;
+            }
+            console.log('Using local path:', videoSrc);
+        }
+
         // Set video source
-        console.log('Setting video source to:', content.videoUrl);
-        videoSource.src = content.videoUrl;
+        console.log('Setting video source to:', videoSrc);
+        videoSource.src = videoSrc;
         videoPlayer.load();
 
         // Load viewing progress
