@@ -146,8 +146,6 @@ router.post('/profiles/:profileId/unlike', requireAuth, [
 // Get global like counts
 router.get('/content/likes', requireAuth, profileController.getGlobalLikeCounts);
 
-<<<<<<< Updated upstream
-=======
 // ============================================
 // Viewing History Routes
 // ============================================
@@ -178,5 +176,4 @@ router.post('/profiles/:profileId/viewing-history', requireAuth, [
 // Delete viewing history
 router.delete('/profiles/:profileId/viewing-history/:contentId', requireAuth, viewingHistoryController.deleteProgress);
 
->>>>>>> Stashed changes
 module.exports = router;
