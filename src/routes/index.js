@@ -8,6 +8,7 @@ const authController = require('../controllers/authController');
 const profileController = require('../controllers/profileController');
 const viewingHistoryController = require('../controllers/viewingHistoryController');
 const validateRequest = require('../middleware/validateRequest');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 // Import models
 const Content = require('../models/Content');
@@ -22,7 +23,7 @@ router.get('/health', (req, res) => {
 });
 
 // Get content data
-router.get('/content', async (req, res) => {
+router.get('/content', requireAuth, async (req, res) => {
   try {
     // Check if database is connected
     if (mongoose.connection.readyState !== 1) {
@@ -79,15 +80,21 @@ router.post('/auth/login', [
     .withMessage('Password is required')
 ], validateRequest, authController.login);
 
+// Current user session
+router.get('/auth/me', authController.getCurrentUser);
+
+// Logout
+router.post('/auth/logout', authController.logout);
+
 // ============================================
 // Profile Routes
 // ============================================
 
 // Get user profiles
-router.get('/users/:userId/profiles', profileController.getProfiles);
+router.get('/users/:userId/profiles', requireAuth, profileController.getProfiles);
 
 // Create new profile
-router.post('/users/:userId/profiles', [
+router.post('/users/:userId/profiles', requireAuth, [
   body('name')
     .isLength({ min: 1, max: 20 })
     .withMessage('Profile name must be between 1 and 20 characters')
@@ -98,7 +105,7 @@ router.post('/users/:userId/profiles', [
 ], validateRequest, profileController.createProfile);
 
 // Update profile
-router.put('/profiles/:profileId', [
+router.put('/profiles/:profileId', requireAuth, [
   body('name')
     .isLength({ min: 1, max: 20 })
     .withMessage('Profile name must be between 1 and 20 characters')
@@ -114,31 +121,31 @@ router.put('/profiles/:profileId', [
 ], validateRequest, profileController.updateProfile);
 
 // Delete profile
-router.delete('/profiles/:profileId', [
+router.delete('/profiles/:profileId', requireAuth, [
   body('userId')
     .notEmpty()
     .withMessage('User ID is required')
 ], validateRequest, profileController.deleteProfile);
 
 // Get profile likes
-router.get('/profiles/:profileId/likes', profileController.getLikes);
+router.get('/profiles/:profileId/likes', requireAuth, profileController.getLikes);
 
 // Like content
-router.post('/profiles/:profileId/like', [
+router.post('/profiles/:profileId/like', requireAuth, [
   body('contentId')
     .isNumeric()
     .withMessage('Content ID must be a number')
 ], validateRequest, profileController.likeContent);
 
 // Unlike content
-router.post('/profiles/:profileId/unlike', [
+router.post('/profiles/:profileId/unlike', requireAuth, [
   body('contentId')
     .isNumeric()
     .withMessage('Content ID must be a number')
 ], validateRequest, profileController.unlikeContent);
 
 // Get global like counts
-router.get('/content/likes', profileController.getGlobalLikeCounts);
+router.get('/content/likes', requireAuth, profileController.getGlobalLikeCounts);
 
 // ============================================
 // Viewing History Routes

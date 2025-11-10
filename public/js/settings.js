@@ -1,16 +1,22 @@
 // Settings page functionality
 let profiles = [];
+function getCurrentUserId() {
+    return window.currentUser?.id || null;
+}
 
 // Load user email and profiles on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadUserInfo();
-    loadProfiles();
+document.addEventListener('DOMContentLoaded', async function() {
+    const user = await checkAuth();
+    if (!user) return;
+
+    loadUserInfo(user);
+    await loadProfiles(user.id);
     setupEventListeners();
     // Initial form state will be set after profiles load
 });
 
-function loadUserInfo() {
-    const userEmail = localStorage.getItem('userEmail');
+function loadUserInfo(user) {
+    const userEmail = user?.email;
     const profileImage = document.getElementById('profileImage');
     const selectedProfileAvatar = localStorage.getItem('selectedProfileAvatar');
 
@@ -26,8 +32,7 @@ function loadUserInfo() {
     }
 }
 
-async function loadProfiles() {
-    const userId = localStorage.getItem('userId');
+async function loadProfiles(userId) {
     const profilesGrid = document.getElementById('profilesGrid');
     
     if (!userId) {
@@ -45,7 +50,12 @@ async function loadProfiles() {
     `;
     
     try {
-        const response = await fetch(`/api/users/${userId}/profiles`);
+        const response = await fetch(`/api/users/${userId}/profiles`, {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         const data = await response.json();
         
         if (response.ok) {
@@ -60,6 +70,20 @@ async function loadProfiles() {
         console.error('Error loading profiles:', error);
         showError('Connection failed. Please check your internet connection and try again.');
     }
+}
+
+async function refreshProfiles() {
+    let userId = getCurrentUserId();
+    if (!userId) {
+        const user = await checkAuth(false);
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        userId = user.id;
+    }
+
+    await loadProfiles(userId);
 }
 
 function renderProfiles() {
@@ -152,9 +176,20 @@ async function handleAddProfile(event) {
     setLoadingState(submitBtn, true);
     
     try {
-        const userId = localStorage.getItem('userId');
+        let userId = getCurrentUserId();
+        if (!userId) {
+            const user = await checkAuth(false);
+            if (!user) {
+                showGeneralError('You have been logged out. Please sign in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+            userId = user.id;
+        }
+
         const response = await fetch(`/api/users/${userId}/profiles`, {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -186,7 +221,7 @@ async function handleAddProfile(event) {
             selectedAvatar.checked = false;
 
             // Refresh profiles list
-            await loadProfiles();
+            await refreshProfiles();
         } else {
             // Handle server errors
             if (data.details && Array.isArray(data.details)) {
@@ -300,7 +335,7 @@ function showError(message) {
         <div class="error-state">
             <h3>Error</h3>
             <p>${message}</p>
-            <button onclick="loadProfiles()" class="btn btn-primary">Retry</button>
+            <button onclick="refreshProfiles()" class="btn btn-primary">Retry</button>
         </div>
     `;
 }
@@ -364,9 +399,19 @@ async function handleEditProfile() {
     setEditLoadingState(submitBtn, true);
     
     try {
-        const userId = localStorage.getItem('userId');
+        let userId = getCurrentUserId();
+        if (!userId) {
+            const user = await checkAuth(false);
+            if (!user) {
+                showEditGeneralError('Your session has expired. Please sign in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+            userId = user.id;
+        }
         const response = await fetch(`/api/profiles/${profileId}`, {
             method: 'PUT',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -398,7 +443,7 @@ async function handleEditProfile() {
             }
 
             // Refresh profiles list
-            await loadProfiles();
+            await refreshProfiles();
         } else {
             // Handle server errors
             if (data.details && Array.isArray(data.details)) {
@@ -435,9 +480,19 @@ async function handleDeleteProfile(profileId) {
     }
 
     try {
-        const userId = localStorage.getItem('userId');
+        let userId = getCurrentUserId();
+        if (!userId) {
+            const user = await checkAuth(false);
+            if (!user) {
+                alert('Your session has expired. Please sign in again.');
+                window.location.href = 'login.html';
+                return;
+            }
+            userId = user.id;
+        }
         const response = await fetch(`/api/profiles/${profileId}`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -465,7 +520,7 @@ async function handleDeleteProfile(profileId) {
             }
 
             // Refresh profiles list
-            await loadProfiles();
+            await refreshProfiles();
         } else {
             // Handle server errors
             alert(data.error || 'Failed to delete profile. Please try again.');

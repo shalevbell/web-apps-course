@@ -34,6 +34,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     try {
         const response = await fetch('/api/auth/login', {
             method: 'POST',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -49,11 +50,11 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             // Login successful
             const rememberMe = document.getElementById('rememberMe').checked;
             
-            // Save user data to localStorage
-            localStorage.setItem('userEmail', data.data.email);
-            localStorage.setItem('userId', data.data.id);
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('rememberMe', String(rememberMe));
+            if (rememberMe) {
+                localStorage.setItem('rememberMe', 'true');
+            } else {
+                localStorage.removeItem('rememberMe');
+            }
             
             // Redirect to profiles page
             window.location.href = 'profiles.html';
