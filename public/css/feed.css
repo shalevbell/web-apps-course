@@ -319,9 +319,33 @@ body {
     margin-right: 10px;
 }
 
+.content-item::before {
+    content: '\F4F4';
+    font-family: 'bootstrap-icons';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 60px;
+    color: rgba(255, 255, 255, 0.9);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
 .content-item:hover {
     transform: scale(1.05);
     z-index: 1;
+}
+
+.content-item:hover::before {
+    opacity: 1;
+}
+
+.content-item:hover .content-image {
+    filter: brightness(0.5);
 }
 
 .content-image {
@@ -330,6 +354,7 @@ body {
     object-fit: cover;
     object-position: center left;
     border-radius: 4px;
+    transition: filter 0.3s ease;
 }
 
 .content-title {
@@ -386,6 +411,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    pointer-events: auto;
 }
 
 .like-btn {

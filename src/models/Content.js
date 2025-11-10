@@ -56,6 +56,11 @@ const contentSchema = new mongoose.Schema({
   image: {
     type: String,
     required: [true, 'Image path is required']
+  },
+  videoUrl: {
+    type: String,
+    required: false,
+    default: null
   }
 }, {
   timestamps: true
