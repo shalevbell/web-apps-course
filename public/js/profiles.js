@@ -1,18 +1,19 @@
 // Load and render profiles from server API
 let profiles = [];
 
+function getCurrentUserId() {
+    return window.currentUser?.id || null;
+}
+
 // Function to load profiles from server
-async function loadProfiles() {
-    const userId = localStorage.getItem('userId');
-    
-    if (!userId) {
-        console.error('No user ID found');
-        window.location.href = 'login.html';
-        return;
-    }
-    
+async function loadProfiles(userId) {
     try {
-        const response = await fetch(`/api/users/${userId}/profiles`);
+        const response = await fetch(`/api/users/${userId}/profiles`, {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         const data = await response.json();
         
         if (response.ok) {
@@ -26,6 +27,20 @@ async function loadProfiles() {
         console.error('Error loading profiles:', error);
         showError('Connection failed. Please check your internet connection and try again.');
     }
+}
+
+async function refreshProfiles() {
+    let userId = getCurrentUserId();
+    if (!userId) {
+        const user = await checkAuth(false);
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        userId = user.id;
+    }
+
+    await loadProfiles(userId);
 }
 
 // Function to render profiles
@@ -77,14 +92,17 @@ function showError(message) {
         <div class="error-state">
             <h3>Error</h3>
             <p>${message}</p>
-            <button onclick="loadProfiles()" class="btn btn-primary">Retry</button>
+            <button onclick="refreshProfiles()" class="btn btn-primary">Retry</button>
         </div>
     `;
 }
         
 // Load profiles when the DOM loads
-document.addEventListener('DOMContentLoaded', function() {
-    loadProfiles();
+document.addEventListener('DOMContentLoaded', async function() {
+    const user = await checkAuth();
+    if (!user) return;
+
+    await loadProfiles(user.id);
 
     // Add event listener for Manage Profiles button
     const manageProfilesBtn = document.querySelector('.btn-manage-profiles');

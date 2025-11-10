@@ -1,10 +1,33 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const https = require('https');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const selfsigned = require('selfsigned');
 const connectDB = require('./src/config/db');
 const logger = require('./src/utils/logger');
 const { seedContent } = require('./src/utils/seedContent');
 const app = express();
+
+// Database & session configuration
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/netflix-clone';
+const sessionSecret = process.env.SESSION_SECRET || 'dev_session_secret';
+const NODE_ENV = process.env.NODE_ENV || 'production';
+process.env.NODE_ENV = NODE_ENV;
+const isProduction = NODE_ENV === 'production';
+const sessionCookieSecure = typeof process.env.SESSION_COOKIE_SECURE === 'string'
+  ? process.env.SESSION_COOKIE_SECURE === 'true'
+  : isProduction;
+const sessionCookieSameSite = sessionCookieSecure ? 'none' : 'lax';
+
+if (!process.env.SESSION_SECRET) {
+  logger.warn('[SERVER] SESSION_SECRET not set. Falling back to development secret.');
+}
+
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
 
 // Parse JSON request bodies
 app.use(express.json());
@@ -18,6 +41,25 @@ app.use((req, res, next) => {
   console.log(`[${timestamp}] ${req.method} ${req.url}`);
   next();
 });
+
+// Session management
+app.use(session({
+  name: 'sid',
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: mongoUri,
+    collectionName: 'sessions',
+    ttl: 60 * 60 * 24 * 7 // 7 days
+  }),
+  cookie: {
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    sameSite: sessionCookieSameSite,
+    secure: sessionCookieSecure
+  }
+}));
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -51,6 +93,7 @@ app.use((err, req, res, next) => {
 // ============================================
 
 const PORT = process.env.PORT || 3000;
+const SSL_DAYS_VALID = parseInt(process.env.SSL_DAYS_VALID || '365', 10);
 
 // Connect to MongoDB and start server
 const startServer = async () => {
@@ -63,12 +106,37 @@ const startServer = async () => {
       await seedContent();
     }
 
-    const server = app.listen(PORT, () => {
+    const attrs = [{ name: 'commonName', value: 'localhost' }];
+    const pems = selfsigned.generate(attrs, {
+      days: SSL_DAYS_VALID,
+      keySize: 2048,
+      algorithm: 'sha256',
+      extensions: [
+        {
+          name: 'basicConstraints',
+          cA: true
+        },
+        {
+          name: 'subjectAltName',
+          altNames: [
+            { type: 2, value: 'localhost' },
+            { type: 7, ip: '127.0.0.1' }
+          ]
+        }
+      ]
+    });
+
+    const server = https.createServer({
+      key: pems.private,
+      cert: pems.cert
+    }, app);
+
+    server.listen(PORT, () => {
       console.log('='.repeat(50));
-      console.log(`Web Apps Course Netflix Clone Server`);
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Database: ${dbConnected ? '✅' : '⚠️'}`);
-      console.log(`Visit: http://localhost:${PORT}/login.html`);
+      console.log(`Web Apps Course Netflix Clone Server (HTTPS)`);
+      console.log(`Server running on https://localhost:${PORT}`);
+      console.log(`Database: ${dbConnected ? 'Connected' : 'Not Connected'}`);
+      console.log(`Visit: https://localhost:${PORT}/login.html`);
       console.log('='.repeat(50));
 
       logger.info(`[SERVER] Server started on port ${PORT}`);

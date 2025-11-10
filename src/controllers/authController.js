@@ -87,15 +87,21 @@ const login = async (req, res) => {
       return sendError(res, 'Incorrect password', 401);
     }
 
-    // Return user data (without password)
-    const userData = {
-      id: user._id,
+    const isAdmin = process.env.ADMIN_EMAIL
+      ? user.email === process.env.ADMIN_EMAIL
+      : false;
+
+    // Store user data in session (without password)
+    req.session.authenticated = true;
+    req.session.user = {
+      id: user._id.toString(),
       email: user.email,
-      username: user.username
+      username: user.username,
+      isAdmin
     };
 
     logger.info(`[AUTH] User logged in successfully: ${email}`);
-    sendSuccess(res, userData, 'Login successful', 200);
+    sendSuccess(res, req.session.user, 'Login successful', 200);
   } catch (error) {
     logger.error(`[AUTH] Login error: ${error.message}`);
     console.error('Login error:', error);
@@ -107,7 +113,34 @@ const login = async (req, res) => {
   }
 };
 
+const logout = (req, res) => {
+  if (!req.session) {
+    return sendSuccess(res, null, 'Logout successful', 200);
+  }
+
+  req.session.destroy((err) => {
+    if (err) {
+      logger.error(`[AUTH] Logout error: ${err.message}`);
+      return sendError(res, 'Failed to logout. Please try again.', 500);
+    }
+
+    res.clearCookie('sid');
+    logger.info('[AUTH] User logged out successfully');
+    sendSuccess(res, null, 'Logout successful', 200);
+  });
+};
+
+const getCurrentUser = (req, res) => {
+  if (req.session?.authenticated && req.session?.user) {
+    return sendSuccess(res, req.session.user, 'User session active', 200);
+  }
+
+  sendError(res, 'Not authenticated', 401);
+};
+
 module.exports = {
   register,
-  login
+  login,
+  logout,
+  getCurrentUser
 };

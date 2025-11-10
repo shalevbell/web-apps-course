@@ -1,35 +1,58 @@
-//Check if the user is logged in and redirect to login page if not
-function checkAuth(redirectIfNotLoggedIn = true) {
-    // Check if user is logged in
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    
-    if (!isLoggedIn && redirectIfNotLoggedIn) {
-        console.log('User not logged in, redirecting to login page');
-        window.location.href = 'login.html';
-        return false;
+// Check if the user is logged in via session and redirect as needed
+async function checkAuth(redirectIfNotLoggedIn = true) {
+    try {
+        const response = await fetch('/api/auth/me', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            if (redirectIfNotLoggedIn) {
+                console.log('User not authenticated, redirecting to login page');
+                window.location.href = 'login.html';
+            }
+            return null;
+        }
+
+        const data = await response.json();
+        window.currentUser = data.data;
+        return data.data;
+    } catch (error) {
+        console.error('Error checking authentication status:', error);
+        if (redirectIfNotLoggedIn) {
+            window.location.href = 'login.html';
+        }
+        return null;
     }
-    
-    // Get user email from localStorage if logged in
-    if (isLoggedIn) {
-        const userEmail = localStorage.getItem('userEmail');
-        console.log('User logged in:', userEmail);
-    }
-    
-    return isLoggedIn;
 }
 
 // Logout function to clear user data and redirect to login page
-function logout() {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('selectedProfileId');
-    localStorage.removeItem('selectedProfileName');
-    localStorage.removeItem('selectedProfileAvatar');
-    localStorage.removeItem('rememberMe');
+async function logout() {
+    try {
+        const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
 
-    // Redirect to login page
-    window.location.href = 'login.html';
+        if (!response.ok) {
+            console.warn('Logout request failed. Redirecting to login page.');
+        }
+    } catch (error) {
+        console.error('Error during logout:', error);
+    } finally {
+        localStorage.removeItem('selectedProfileId');
+        localStorage.removeItem('selectedProfileName');
+        localStorage.removeItem('selectedProfileAvatar');
+        localStorage.removeItem('rememberMe');
+        window.currentUser = null;
+        window.location.href = 'login.html';
+    }
 }
 
 // Run auth check when the page loads
