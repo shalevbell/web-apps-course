@@ -1,4 +1,6 @@
 let contentData = [];
+let popularContentData = [];
+let newestContentByGenre = {};
 let currentView = 'categorized'; // categorized/alphabetical
 let profileLikes = []; // User's liked content IDs
 let globalLikeCounts = {}; // Global like counts for all content
@@ -61,6 +63,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load content data first
     await loadContentData();
 
+    // Load popular and newest content data
+    await loadPopularContent();
+    await loadNewestContentByGenre();
+
     // Load likes data before rendering content
     await loadLikesData();
 
@@ -86,6 +92,36 @@ async function loadContentData() {
         // Don't render content sections yet - wait for likes data to load first
     } catch (error) {
         console.error('Error loading content data:', error);
+    }
+}
+
+// Function to load popular content from API
+async function loadPopularContent() {
+    try {
+        const response = await fetch('/api/content/popular');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        popularContentData = result.data || [];
+    } catch (error) {
+        console.error('Error loading popular content:', error);
+        popularContentData = [];
+    }
+}
+
+// Function to load newest content by genre from API
+async function loadNewestContentByGenre() {
+    try {
+        const response = await fetch('/api/content/newest-by-genre');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        newestContentByGenre = result.data || {};
+    } catch (error) {
+        console.error('Error loading newest content by genre:', error);
+        newestContentByGenre = {};
     }
 }
 
@@ -179,7 +215,31 @@ function renderContentSections() {
             </div>
         `;
     } else {
-        // Group content by type and other categories
+        // Popular Content Section (if available)
+        if (popularContentData.length > 0) {
+            mainContent.innerHTML += `
+                <h2 class="section-title">Most Popular</h2>
+                <div class="content-row">
+                    ${popularContentData.map(item => createContentItemHTML(item)).join('')}
+                </div>
+            `;
+        }
+
+        // Newest Content by Genre Sections
+        const genres = Object.keys(newestContentByGenre);
+        genres.forEach(genre => {
+            const genreContent = newestContentByGenre[genre];
+            if (genreContent && genreContent.length > 0) {
+                mainContent.innerHTML += `
+                    <h2 class="section-title">New ${genre} Releases</h2>
+                    <div class="content-row">
+                        ${genreContent.map(item => createContentItemHTML(item)).join('')}
+                    </div>
+                `;
+            }
+        });
+
+        // Group remaining content by type and other categories
         const series = contentData.filter(item => item.type === 'series');
         const movies = contentData.filter(item => item.type === 'movie');
         const trending = contentData.filter(item => item.year >= 2020);
@@ -474,8 +534,8 @@ function handleContentClick(event) {
     const contentId = contentItem.getAttribute('data-id');
     const contentTitle = contentItem.getAttribute('data-title');
 
-    console.log(`Playing: ${contentTitle} (ID: ${contentId})`);
+    console.log(`Viewing details: ${contentTitle} (ID: ${contentId})`);
 
-    // Navigate to video player
-    window.location.href = `player.html?contentId=${contentId}`;
+    // Navigate to content details page
+    window.location.href = `content-details.html?id=${contentId}`;
 }
