@@ -7,6 +7,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const profileController = require('../controllers/profileController');
 const viewingHistoryController = require('../controllers/viewingHistoryController');
+const contentController = require('../controllers/contentController');
 const validateRequest = require('../middleware/validateRequest');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
@@ -41,6 +42,15 @@ router.get('/content', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Failed to load content data' });
   }
 });
+
+// Get all genres
+router.get('/genres', requireAuth, contentController.getGenres);
+
+// Get filtered content with pagination, sorting, and filters
+router.get('/content/filter', requireAuth, contentController.getFilteredContent);
+
+// Get content by genre with pagination
+router.get('/genres/:genre/content', requireAuth, contentController.getContentByGenre);
 
 // ============================================
 // Authentication Routes
@@ -152,10 +162,10 @@ router.get('/content/likes', requireAuth, profileController.getGlobalLikeCounts)
 // ============================================
 
 // Get all viewing history for a profile
-router.get('/profiles/:profileId/viewing-history', viewingHistoryController.getProfileHistory);
+router.get('/profiles/:profileId/viewing-history', requireAuth, viewingHistoryController.getProfileHistory);
 
 // Get viewing progress for specific content
-router.get('/profiles/:profileId/viewing-history/:contentId', viewingHistoryController.getProgress);
+router.get('/profiles/:profileId/viewing-history/:contentId', requireAuth, viewingHistoryController.getProgress);
 
 // Save viewing progress
 router.post('/profiles/:profileId/viewing-history', [
@@ -172,9 +182,9 @@ router.post('/profiles/:profileId/viewing-history', [
     .isBoolean()
     .optional()
     .withMessage('Completed must be a boolean')
-], validateRequest, viewingHistoryController.saveProgress);
+], requireAuth, validateRequest, viewingHistoryController.saveProgress);
 
 // Delete viewing history
-router.delete('/profiles/:profileId/viewing-history/:contentId', viewingHistoryController.deleteProgress);
+router.delete('/profiles/:profileId/viewing-history/:contentId', requireAuth, viewingHistoryController.deleteProgress);
 
 module.exports = router;
