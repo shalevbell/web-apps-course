@@ -96,7 +96,7 @@ async function loadProfileLikes() {
         });
         if (response.ok) {
             const data = await response.json();
-            profileLikes = data.likes || [];
+            profileLikes = data.data?.likes || [];
         }
     } catch (error) {
         console.error('Error loading likes:', error);
@@ -112,7 +112,8 @@ async function loadViewingHistory() {
         });
         if (response.ok) {
             const data = await response.json();
-            viewingHistory = data.history || [];
+            // API returns { data: [...] }
+            viewingHistory = data.data || data.history || [];
         }
     } catch (error) {
         console.error('Error loading viewing history:', error);
