@@ -1,0 +1,119 @@
+[
+  {
+    "email": "admin@netflix.com",
+    "username": "admin",
+    "password": "admin123",
+    "profiles": [
+      {
+        "name": "Admin",
+        "avatar": "profile_pic_1.png",
+        "likes": [1, 3, 5, 7, 9]
+      }
+    ]
+  },
+  {
+    "email": "john.doe@email.com",
+    "username": "johndoe",
+    "password": "password123",
+    "profiles": [
+      {
+        "name": "John",
+        "avatar": "profile_pic_1.png",
+        "likes": [1, 2, 5, 8, 12, 15]
+      },
+      {
+        "name": "Kids",
+        "avatar": "profile_pic_2.png",
+        "likes": [3, 4, 6, 10]
+      }
+    ]
+  },
+  {
+    "email": "sarah.smith@email.com",
+    "username": "sarahsmith",
+    "password": "password123",
+    "profiles": [
+      {
+        "name": "Sarah",
+        "avatar": "profile_pic_3.png",
+        "likes": [2, 4, 6, 7, 9, 11, 13]
+      },
+      {
+        "name": "Sarah's Kids",
+        "avatar": "profile_pic_4.png",
+        "likes": [1, 3, 5]
+      },
+      {
+        "name": "Guest",
+        "avatar": "profile_pic_2.png",
+        "likes": []
+      }
+    ]
+  },
+  {
+    "email": "mike.johnson@email.com",
+    "username": "mikej",
+    "password": "password123",
+    "profiles": [
+      {
+        "name": "Mike",
+        "avatar": "profile_pic_1.png",
+        "likes": [1, 5, 9, 13, 14, 15]
+      },
+      {
+        "name": "Emily",
+        "avatar": "profile_pic_3.png",
+        "likes": [2, 4, 6, 8, 10, 12]
+      },
+      {
+        "name": "Kids Room",
+        "avatar": "profile_pic_2.png",
+        "likes": [3, 7, 11]
+      }
+    ]
+  },
+  {
+    "email": "emma.wilson@email.com",
+    "username": "emmaw",
+    "password": "password123",
+    "profiles": [
+      {
+        "name": "Emma",
+        "avatar": "profile_pic_4.png",
+        "likes": [2, 3, 6, 10, 14]
+      },
+      {
+        "name": "Movie Night",
+        "avatar": "profile_pic_1.png",
+        "likes": [1, 5, 9, 13]
+      }
+    ]
+  },
+  {
+    "email": "demo@netflix.com",
+    "username": "demo",
+    "password": "demo123",
+    "profiles": [
+      {
+        "name": "Demo User",
+        "avatar": "profile_pic_1.png",
+        "likes": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      },
+      {
+        "name": "Family",
+        "avatar": "profile_pic_2.png",
+        "likes": [11, 12, 13, 14, 15]
+      },
+      {
+        "name": "Travel",
+        "avatar": "profile_pic_3.png",
+        "likes": [1, 6, 11]
+      },
+      {
+        "name": "Documentaries",
+        "avatar": "profile_pic_4.png",
+        "likes": [4, 7, 9]
+      }
+    ]
+  }
+]

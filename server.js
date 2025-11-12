@@ -8,6 +8,8 @@ const selfsigned = require('selfsigned');
 const connectDB = require('./src/config/db');
 const logger = require('./src/utils/logger');
 const { seedContent, seedAdminUser } = require('./src/utils/seedContent');
+const { seedContent } = require('./src/utils/seedContent');
+const { seedUsers } = require('./src/utils/seedUsers');
 const app = express();
 
 // Database & session configuration
@@ -20,6 +22,8 @@ const sessionCookieSecure = typeof process.env.SESSION_COOKIE_SECURE === 'string
   ? process.env.SESSION_COOKIE_SECURE === 'true'
   : isProduction;
 const sessionCookieSameSite = sessionCookieSecure ? 'none' : 'lax';
+
+logger.info(`=======================================`);
 
 if (!process.env.SESSION_SECRET) {
   logger.warn('[SERVER] SESSION_SECRET not set. Falling back to development secret.');
@@ -98,11 +102,12 @@ const SSL_DAYS_VALID = parseInt(process.env.SSL_DAYS_VALID || '365', 10);
 // Connect to MongoDB and start server
 const startServer = async () => {
   try {
-    logger.info(`=======================================`);
     const dbConnected = await connectDB();
 
     // Seed content and admin user into database if connected
+    // Seed data into database if connected
     if (dbConnected) {
+      await seedUsers();
       await seedContent();
       await seedAdminUser();
     }

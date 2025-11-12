@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix - Browse by Genre</title>
+    <link rel="shortcut icon" href="./_images/netflix_assets/netflix_favicon.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/genre.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="header">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <!-- Logo -->
+                <a class="brand me-4" href="feed.html">
+                    <img src="./_images/netflix_assets/netflix_logo.png" alt="Netflix logo" class="logo">
+                </a>
+                <!-- Navigation Menu -->
+                <nav class="d-lg-flex me-auto">
+                    <ul class="nav-list navbar-nav me-auto d-flex flex-row">
+                        <li class="navigation-item">
+                            <a href="feed.html">Home</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a href="#">TV Shows</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a href="#">Movies</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a href="#" class="active">Browse by Genre</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a href="settings.html">Settings</a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- Icons + profile -->
+                <div class="icons d-flex align-items-center">
+                    <a href="feed.html" class="header-icon"><i class="bi bi-search"></i></a>
+                    <a href="#" class="header-icon"><i class="bi bi-bell"></i></a>
+                    <a href="profiles.html" class="d-flex align-items-center header-icon">
+                        <img alt="Profile" class="profile" id="profileImage">
+                        <i class="bi bi-caret-down-fill ms-1" style="font-size: 10px;"></i>
+                    </a>
+                    <a href="#" id="logoutBtn" class="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Genre Header and Filters -->
+    <section class="genre-header">
+        <div class="container-fluid">
+            <h1 class="genre-title" id="genreTitle">Browse by Genre</h1>
+
+            <!-- Filter and Sort Controls -->
+            <div class="controls-container">
+                <div class="control-group">
+                    <label for="genreSelect" class="control-label">Genre:</label>
+                    <select id="genreSelect" class="form-select genre-select">
+                        <option value="">All Genres</option>
+                        <!-- Genres will be dynamically populated -->
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="typeSelect" class="control-label">Type:</label>
+                    <select id="typeSelect" class="form-select type-select">
+                        <option value="">All</option>
+                        <option value="movie">Movies</option>
+                        <option value="series">Series</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="sortSelect" class="control-label">Sort by:</label>
+                    <select id="sortSelect" class="form-select sort-select">
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                        <option value="year-desc">Newest First</option>
+                        <option value="year-asc">Oldest First</option>
+                        <option value="rating">Rating</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="watchedFilter" class="control-label">Filter:</label>
+                    <select id="watchedFilter" class="form-select watched-select">
+                        <option value="all">All Content</option>
+                        <option value="watched">Watched</option>
+                        <option value="unwatched">Not Watched</option>
+                    </select>
+                </div>
+
+                <button id="resetFilters" class="btn btn-outline-light reset-btn">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Filters
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Grid -->
+    <main class="content-container">
+        <div class="container-fluid">
+            <div class="results-info">
+                <p id="resultsCount" class="results-text">Loading content...</p>
+            </div>
+            <div class="content-grid" id="contentGrid">
+                <!-- Content cards will be dynamically generated -->
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="loading-container" id="loadingIndicator">
+                <div class="spinner-border text-danger" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="loading-text">Loading more content...</p>
+            </div>
+
+            <!-- No Results Message -->
+            <div class="no-results" id="noResults">
+                <i class="bi bi-film"></i>
+                <p>No content found matching your filters.</p>
+                <button class="btn btn-danger" onclick="document.getElementById('resetFilters').click()">
+                    Reset Filters
+                </button>
+            </div>
+
+            <!-- End of Content Message -->
+            <div class="end-message" id="endMessage">
+                <p>You've reached the end of the content!</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="./js/auth.js"></script>
+    <script src="./js/genre.js"></script>
+</body>
+</html>
