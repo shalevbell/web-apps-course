@@ -170,10 +170,6 @@ body {
 }
 
 .table {
-    --bs-table-bg: #1a1a1a;
-    --bs-table-striped-bg: #222;
-    --bs-table-active-bg: #333;
-    --bs-table-hover-bg: #2a2a2a;
     color: #ffffff;
 }
 
