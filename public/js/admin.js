@@ -25,6 +25,16 @@ class AdminPanel {
         document.getElementById('videoFile').addEventListener('change', this.handleVideoSelect.bind(this));
         document.getElementById('thumbnailFile').addEventListener('change', this.handleThumbnailSelect.bind(this));
 
+        // Edit modal type change handler
+        document.getElementById('editContentType').addEventListener('change', this.handleEditTypeChange.bind(this));
+
+        // Edit form file handlers
+        document.getElementById('editVideoFile').addEventListener('change', this.handleEditVideoSelect.bind(this));
+        document.getElementById('editThumbnailFile').addEventListener('change', this.handleEditThumbnailSelect.bind(this));
+
+        // Update button
+        document.getElementById('updateContentBtn').addEventListener('click', this.handleUpdateContent.bind(this));
+
         // Content management
         document.getElementById('refreshContentBtn').addEventListener('click', this.loadContent.bind(this));
         document.getElementById('searchContent').addEventListener('input', this.handleSearch.bind(this));
@@ -420,6 +430,9 @@ class AdminPanel {
                 <td title="${content.genre}">${content.genre.length > 20 ? content.genre.substring(0, 20) + '...' : content.genre}</td>
                 <td>${content.rating || 'N/A'}</td>
                 <td>
+                    <button class="btn btn-sm btn-outline-primary action-btn me-1" onclick="adminPanel.editContent(${content.id})" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </button>
                     <button class="btn btn-sm btn-outline-danger action-btn" onclick="adminPanel.deleteContent(${content.id})" title="Delete">
                         <i class="bi bi-trash"></i>
                     </button>
@@ -467,6 +480,150 @@ class AdminPanel {
         } catch (error) {
             console.error('Delete error:', error);
             this.showAlert(error.message || 'Failed to delete content', 'danger');
+        }
+    }
+
+    async editContent(contentId) {
+        try {
+            // Find the content in the cached list
+            const content = this.allContent.find(c => c.id === contentId);
+
+            if (!content) {
+                this.showAlert('Content not found', 'danger');
+                return;
+            }
+
+            // Store current content ID
+            this.currentEditingId = contentId;
+
+            // Populate form fields
+            document.getElementById('editContentId').value = content.id;
+            document.getElementById('editContentName').value = content.name;
+            document.getElementById('editContentYear').value = content.year;
+            document.getElementById('editContentGenre').value = content.genre;
+            document.getElementById('editContentType').value = content.type;
+            document.getElementById('editContentDescription').value = content.description;
+            document.getElementById('editContentDirector').value = content.director || '';
+            document.getElementById('editContentActors').value = content.actors || '';
+            document.getElementById('editContentRating').value = content.rating || '';
+
+            // Handle type-specific fields
+            if (content.type === 'movie') {
+                document.getElementById('editMovieFields').style.display = 'block';
+                document.getElementById('editSeriesFields').style.display = 'none';
+                document.getElementById('editContentDuration').value = content.duration || '';
+            } else if (content.type === 'series') {
+                document.getElementById('editMovieFields').style.display = 'none';
+                document.getElementById('editSeriesFields').style.display = 'block';
+                document.getElementById('editContentSeasons').value = content.seasons || '';
+                document.getElementById('editContentEpisodes').value = content.episodes || '';
+            }
+
+            // Show current thumbnail
+            if (content.image) {
+                document.getElementById('editThumbnailPreview').src = content.image;
+                document.getElementById('editCurrentThumbnail').style.display = 'block';
+            } else {
+                document.getElementById('editCurrentThumbnail').style.display = 'none';
+            }
+
+            // Clear file inputs
+            document.getElementById('editVideoFile').value = '';
+            document.getElementById('editThumbnailFile').value = '';
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+
+        } catch (error) {
+            console.error('Edit content error:', error);
+            this.showAlert('Failed to load content for editing', 'danger');
+        }
+    }
+
+    handleEditTypeChange(event) {
+        const type = event.target.value;
+        const movieFields = document.getElementById('editMovieFields');
+        const seriesFields = document.getElementById('editSeriesFields');
+
+        if (type === 'movie') {
+            movieFields.style.display = 'block';
+            seriesFields.style.display = 'none';
+        } else if (type === 'series') {
+            movieFields.style.display = 'none';
+            seriesFields.style.display = 'block';
+        } else {
+            movieFields.style.display = 'none';
+            seriesFields.style.display = 'none';
+        }
+    }
+
+    handleEditVideoSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.validateVideoFile(file);
+        }
+    }
+
+    handleEditThumbnailSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            this.validateImageFile(file);
+            // Show preview of new thumbnail
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('editThumbnailPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async handleUpdateContent() {
+        try {
+            const contentId = document.getElementById('editContentId').value;
+            const form = document.getElementById('editForm');
+            const formData = new FormData(form);
+
+            // Show progress
+            const updateBtn = document.getElementById('updateContentBtn');
+            const originalText = updateBtn.innerHTML;
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
+
+            const response = await fetch(`/api/admin/content/${contentId}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                this.showAlert('Content updated successfully!', 'success');
+
+                // Hide modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editModal'));
+                if (modal) {
+                    modal.hide();
+                }
+
+                // Refresh content list
+                this.loadContent();
+            } else {
+                throw new Error(result.error || 'Update failed');
+            }
+
+            // Restore button
+            updateBtn.disabled = false;
+            updateBtn.innerHTML = originalText;
+
+        } catch (error) {
+            console.error('Update error:', error);
+            this.showAlert(error.message || 'Failed to update content', 'danger');
+
+            // Restore button
+            const updateBtn = document.getElementById('updateContentBtn');
+            updateBtn.disabled = false;
+            updateBtn.innerHTML = '<i class="bi bi-check-circle"></i> Update Content';
         }
     }
 
