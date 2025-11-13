@@ -12,16 +12,16 @@ A full-stack Netflix-inspired streaming platform built with vanilla JavaScript, 
 
 ## Features
 
-- 🔐 **User Authentication** - Register, login, session management
-- 👤 **Multi-Profile Support** - Up to 5 profiles per user (Netflix-style)
-- 🎬 **Content Browsing** - Filter by genre, type, watched status with pagination
-- ▶️ **Video Player** - HTML5 player with resume/continue watching functionality
-- ⭐ **Like System** - Like content and see global like counts
-- 🎯 **Personalized Recommendations** - Based on viewing history and likes
-- 📊 **OMDB Integration** - Fetch real-time IMDB, Rotten Tomatoes, and Metascore ratings
-- 🔍 **Search & Filters** - Advanced filtering and sorting options
-- 👑 **Admin Panel** - Upload and manage content (images & videos)
-- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
+- **User Authentication** - Register, login, session management
+- **Multi-Profile Support** - Up to 5 profiles per user (Netflix-style)
+- **Content Browsing** - Filter by genre, type, watched status with pagination
+- **Video Player** - HTML5 player with resume/continue watching functionality
+- **Like System** - Like content and see global like counts
+- **Personalized Recommendations** - Based on viewing history and likes
+- **OMDB Integration** - Fetch real-time IMDB, Rotten Tomatoes, and Metascore ratings
+- **Search & Filters** - Advanced filtering and sorting options
+- **Admin Panel** - Upload and manage content (images & videos)
+- **Responsive Design** - Works on desktop, tablet, and mobile
 
 ## Installation
 
@@ -279,71 +279,7 @@ web-apps-course/
 | `PORT` | Changes the server port | `3000` |
 | `MONGODB_URI` | Custom MongoDB connection string for production | `mongodb://localhost:27017/netflix-clone` |
 
-### API Endpoints
-
-**Authentication**
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user session
-- `POST /api/auth/logout` - Logout user
-
-**Profiles**
-- `GET /api/users/:userId/profiles` - Get all profiles for user
-- `POST /api/users/:userId/profiles` - Create new profile
-- `PUT /api/profiles/:profileId` - Update profile
-- `DELETE /api/profiles/:profileId` - Delete profile
-
-**Content**
-- `GET /api/content` - Get all content
-- `GET /api/content/filter` - Get filtered content with pagination
-- `GET /api/content/popular` - Get most liked content
-- `GET /api/genres` - Get all genres
-- `GET /api/genres/:genre/content` - Get content by genre
-
-**Likes**
-- `GET /api/profiles/:profileId/likes` - Get liked content
-- `POST /api/profiles/:profileId/like` - Like content
-- `POST /api/profiles/:profileId/unlike` - Unlike content
-- `GET /api/content/likes` - Get global like counts
-
-**Viewing History**
-- `GET /api/profiles/:profileId/viewing-history` - Get watch history
-- `GET /api/profiles/:profileId/viewing-history/:contentId` - Get progress for specific content
-- `POST /api/profiles/:profileId/viewing-history` - Save viewing progress
-- `DELETE /api/profiles/:profileId/viewing-history/:contentId` - Delete viewing history
-
-**OMDB Integration**
-- `GET /api/omdb/search` - Search OMDB by title
-- `GET /api/omdb/:imdbId` - Get OMDB data by IMDB ID
-- `POST /api/content/:contentId/omdb-rating` - Update content with OMDB rating (admin)
-- `POST /api/omdb/sync-all` - Sync all content with OMDB ratings (admin)
-
-**Admin**
-- `GET /api/admin/content` - Get all content (admin view)
-- `POST /api/admin/content` - Create new content with file uploads
-- `DELETE /api/admin/content/:contentId` - Delete content
-
-## Development Tips
-
-### Database Management
-```bash
-# View database contents
-docker exec $(docker ps -q -f name=mongodb) mongosh --quiet netflix-clone --eval "db.contents.find().pretty()"
-
-# Clear all viewing history
-docker exec $(docker ps -q -f name=mongodb) mongosh --quiet netflix-clone --eval "db.viewinghistories.deleteMany({})"
-
-# Clear all content
-docker exec $(docker ps -q -f name=mongodb) mongosh --quiet netflix-clone --eval "db.contents.deleteMany({})"
-```
-
 ### Logs
 Application logs are written to:
 - `logs/app.log` - All logs
 - `logs/error.log` - Errors only
-
-### OMDB API Key
-Get your free API key at: <http://www.omdbapi.com/apikey.aspx>
-
-## License
-ISC
