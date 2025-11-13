@@ -16,6 +16,7 @@
     "express-session": "^1.18.2",
     "express-validator": "^7.0.1",
     "mongoose": "^7.5.0",
+    "multer": "^2.0.2",
     "selfsigned": "^4.0.0",
     "winston": "^3.18.3"
   }
