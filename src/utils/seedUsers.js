@@ -26,7 +26,8 @@ async function seedUsers() {
       const user = await User.create({
         email: userData.email,
         username: userData.username,
-        password: userData.password
+        password: userData.password,
+        isAdmin: userData.isAdmin || false
       });
 
       totalUsersCreated++;
@@ -76,7 +77,8 @@ async function reseedUsers() {
       const user = await User.create({
         email: userData.email,
         username: userData.username,
-        password: userData.password
+        password: userData.password,
+        isAdmin: userData.isAdmin || false
       });
 
       totalUsersCreated++;

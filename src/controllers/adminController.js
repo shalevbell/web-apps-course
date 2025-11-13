@@ -10,9 +10,9 @@ const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     let uploadDir;
     if (file.fieldname === 'video') {
-      uploadDir = path.join(__dirname, '../../public/videos');
+      uploadDir = path.join(__dirname, '../../public/_videos/uploaded');
     } else if (file.fieldname === 'thumbnail') {
-      uploadDir = path.join(__dirname, '../../public/_images');
+      uploadDir = path.join(__dirname, '../../public/_images/uploaded');
     } else {
       return cb(new Error('Invalid field name'));
     }
@@ -135,10 +135,10 @@ const createContent = async (req, res) => {
 
     if (req.files) {
       if (req.files.video && req.files.video[0]) {
-        videoUrl = `/videos/${req.files.video[0].filename}`;
+        videoUrl = `/_videos/uploaded/${req.files.video[0].filename}`;
       }
       if (req.files.thumbnail && req.files.thumbnail[0]) {
-        imageUrl = `/_images/${req.files.thumbnail[0].filename}`;
+        imageUrl = `/_images/uploaded/${req.files.thumbnail[0].filename}`;
       }
     }
 
