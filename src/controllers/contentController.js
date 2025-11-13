@@ -1,5 +1,7 @@
 const Content = require('../models/Content');
 const Profile = require('../models/Profile');
+const ViewingHistory = require('../models/ViewingHistory');
+const { sendSuccess, sendError } = require('../utils/responses');
 const mongoose = require('mongoose');
 
 // Get all content (existing functionality)
@@ -170,19 +172,8 @@ const getSimilarContent = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllContent,
-  getPopularContent,
-  getNewestContentByGenre,
-  getSimilarContent
-};
-const mongoose = require('mongoose');
-const Content = require('../models/Content');
-const ViewingHistory = require('../models/ViewingHistory');
-const { sendSuccess, sendError } = require('../utils/responses');
-
 // Get all content with filtering, sorting, and pagination
-exports.getFilteredContent = async (req, res) => {
+const getFilteredContent = async (req, res) => {
   try {
     // Check if database is connected
     if (mongoose.connection.readyState !== 1) {
@@ -288,7 +279,7 @@ exports.getFilteredContent = async (req, res) => {
 };
 
 // Get content by genre with pagination, sorting, and filtering (kept for backward compatibility)
-exports.getContentByGenre = async (req, res) => {
+const getContentByGenre = async (req, res) => {
   try {
     // Check if database is connected
     if (mongoose.connection.readyState !== 1) {
@@ -373,7 +364,7 @@ exports.getContentByGenre = async (req, res) => {
 };
 
 // Get all unique genres (split comma-separated genres into individual ones)
-exports.getGenres = async (req, res) => {
+const getGenres = async (req, res) => {
   try {
     // Check if database is connected
     if (mongoose.connection.readyState !== 1) {
@@ -398,4 +389,14 @@ exports.getGenres = async (req, res) => {
     console.error('Error fetching genres:', error);
     sendError(res, 'Failed to fetch genres', 500);
   }
+};
+
+module.exports = {
+  getAllContent,
+  getPopularContent,
+  getNewestContentByGenre,
+  getSimilarContent,
+  getFilteredContent,
+  getContentByGenre,
+  getGenres
 };

@@ -8,7 +8,6 @@ const selfsigned = require('selfsigned');
 const connectDB = require('./src/config/db');
 const logger = require('./src/utils/logger');
 const { seedContent, seedAdminUser } = require('./src/utils/seedContent');
-const { seedContent } = require('./src/utils/seedContent');
 const { seedUsers } = require('./src/utils/seedUsers');
 const app = express();
 
