@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (!user) return;
 
     loadUserInfo(user);
+    checkAdminStatus(user);
     await loadProfiles(user.id);
     setupEventListeners();
     await loadStatistics(user.id);
@@ -33,6 +34,17 @@ function loadUserInfo(user) {
     } else {
         // Default avatar if no profile selected yet
         profileImage.src = `./_images/profile/profile_pic_default.png`;
+    }
+}
+
+function checkAdminStatus(user) {
+    const adminBtn = document.getElementById('adminPanelBtn');
+
+    // Show admin button only if user is an admin
+    if (user?.isAdmin === true) {
+        adminBtn.style.display = 'flex';
+    } else {
+        adminBtn.style.display = 'none';
     }
 }
 
