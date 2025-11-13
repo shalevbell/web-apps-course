@@ -392,6 +392,128 @@ exports.getGenres = async (req, res) => {
   }
 };
 
+// Get personalized recommendations for a profile
+const getPersonalizedRecommendations = async (req, res) => {
+  try {
+    const { profileId } = req.params;
+    const limit = parseInt(req.query.limit) || 10;
+
+    // Check if database is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not available',
+        message: 'Recommendations require database connection'
+      });
+    }
+
+    // Get profile's likes and viewing history
+    const profile = await Profile.findById(profileId).select('likes');
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    const viewingHistory = await ViewingHistory.find({ profileId })
+      .select('contentId')
+      .lean();
+
+    const likedContentIds = profile.likes || [];
+    const watchedContentIds = viewingHistory.map(vh => vh.contentId);
+
+    // Combine liked and watched content IDs (remove duplicates)
+    const userContentIds = [...new Set([...likedContentIds, ...watchedContentIds])];
+
+    // If user has no history, return popular unwatched content
+    if (userContentIds.length === 0) {
+      const popularContent = await Profile.aggregate([
+        { $unwind: '$likes' },
+        { $group: { _id: '$likes', totalLikes: { $sum: 1 } } },
+        { $sort: { totalLikes: -1 } },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: 'contents',
+            localField: '_id',
+            foreignField: 'id',
+            as: 'contentDetails'
+          }
+        },
+        { $unwind: '$contentDetails' },
+        {
+          $project: {
+            _id: 0,
+            id: '$contentDetails.id',
+            name: '$contentDetails.name',
+            year: '$contentDetails.year',
+            genre: '$contentDetails.genre',
+            type: '$contentDetails.type',
+            episodes: '$contentDetails.episodes',
+            seasons: '$contentDetails.seasons',
+            duration: '$contentDetails.duration',
+            rating: '$contentDetails.rating',
+            description: '$contentDetails.description',
+            image: '$contentDetails.image',
+            videoUrl: '$contentDetails.videoUrl'
+          }
+        }
+      ]);
+
+      return res.json({
+        success: true,
+        data: popularContent,
+        count: popularContent.length,
+        reason: 'popular'
+      });
+    }
+
+    // Get genres from liked and watched content
+    const userContent = await Content.find({
+      id: { $in: userContentIds }
+    }).select('genre type');
+
+    // Extract all genres (handle comma-separated genres)
+    const genreSet = new Set();
+    const typeSet = new Set();
+
+    userContent.forEach(content => {
+      const genres = content.genre.split(',').map(g => g.trim());
+      genres.forEach(genre => genreSet.add(genre));
+      typeSet.add(content.type);
+    });
+
+    const userGenres = Array.from(genreSet);
+    const userTypes = Array.from(typeSet);
+
+    // Build recommendation query
+    // Find content that matches user's preferred genres/types but hasn't been watched
+    const recommendations = await Content.find({
+      id: { $nin: userContentIds }, // Exclude already watched/liked
+      $or: [
+        // Match any of the user's preferred genres
+        ...userGenres.map(genre => ({
+          genre: { $regex: new RegExp(`(^|,\\s*)${genre}(\\s*,|$)`, 'i') }
+        })),
+        // Match any of the user's preferred types
+        { type: { $in: userTypes } }
+      ]
+    })
+    .sort({ rating: -1, year: -1 }) // Prioritize highly rated and recent content
+    .limit(limit)
+    .select('-__v -createdAt -updatedAt')
+    .lean();
+
+    res.json({
+      success: true,
+      data: recommendations,
+      count: recommendations.length,
+      reason: 'personalized'
+    });
+
+  } catch (error) {
+    console.error('Error fetching personalized recommendations:', error);
+    res.status(500).json({ error: 'Failed to load recommendations' });
+  }
+};
+
 module.exports = {
   getAllContent,
   getPopularContent,
@@ -399,5 +521,6 @@ module.exports = {
   getSimilarContent,
   getFilteredContent: exports.getFilteredContent,
   getContentByGenre: exports.getContentByGenre,
-  getGenres: exports.getGenres
+  getGenres: exports.getGenres,
+  getPersonalizedRecommendations
 };
