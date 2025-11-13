@@ -10,7 +10,8 @@
     "rating": "TV-14",
     "description": "When a young boy disappears, his mother, a police chief and his friends must confront terrifying supernatural forces in order to get him back.",
     "image": "./_images/posters/stranger_things.jpg",
-    "videoUrl": "sample_video.mp4"
+    "videoUrl": "sample_video.mp4",
+    "imdbId": "tt4574334"
   },
   {
     "id": 2,
@@ -23,7 +24,8 @@
     "rating": "TV-MA",
     "description": "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.",
     "image": "./_images/posters/breaking_bad.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "imdbId": "tt0903747"
   },
   {
     "id": 3,
@@ -36,7 +38,8 @@
     "rating": "TV-MA",
     "description": "Geralt of Rivia, a solitary monster hunter, struggles to find his place in a world where people often prove more wicked than beasts.",
     "image": "./_images/posters/the_witcher.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "imdbId": "tt5180504"
   },
   {
     "id": 4,
@@ -48,7 +51,8 @@
     "rating": "PG-13",
     "description": "A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
     "image": "./_images/posters/inception.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "imdbId": "tt1375666"
   },
   {
     "id": 5,
@@ -61,7 +65,8 @@
     "rating": "TV-MA",
     "description": "An unusual group of robbers attempt to carry out the most perfect robbery in Spanish history - stealing 2.4 billion euros from the Royal Mint of Spain.",
     "image": "./_images/posters/money_heist.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "imdbId": "tt6468322"
   },
   {
     "id": 6,
@@ -74,7 +79,8 @@
     "rating": "TV-MA",
     "description": "An anthology series exploring a twisted, high-tech multiverse where humanity's greatest innovations and darkest instincts collide.",
     "image": "./_images/posters/black_mirror.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    "imdbId": "tt2085059"
   },
   {
     "id": 7,
@@ -86,7 +92,8 @@
     "rating": "PG-13",
     "description": "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.",
     "image": "./_images/posters/avatar_the_way_of_water.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    "imdbId": "tt1630029"
   },
   {
     "id": 8,
@@ -99,7 +106,8 @@
     "rating": "TV-14",
     "description": "Smart, sarcastic and a little dead inside, Wednesday Addams investigates a murder spree while making new friends — and foes — at Nevermore Academy.",
     "image": "./_images/posters/wednesday.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "imdbId": "tt13443470"
   },
   {
     "id": 9,
@@ -111,7 +119,8 @@
     "rating": "PG-13",
     "description": "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city's hidden corruption and question his family's involvement.",
     "image": "./_images/posters/the_batman.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+    "imdbId": "tt1877830"
   },
   {
     "id": 10,
@@ -123,7 +132,8 @@
     "rating": "PG-13",
     "description": "After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN's elite graduates on a mission that demands the ultimate sacrifice from those chosen to fly it.",
     "image": "./_images/posters/top_gun_maverick.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    "imdbId": "tt1745960"
   },
   {
     "id": 11,
@@ -136,7 +146,8 @@
     "rating": "TV-MA",
     "description": "Follows the political rivalries and romance of Queen Elizabeth II's reign and the events that shaped the second half of the twentieth century.",
     "image": "./_images/posters/the_crown.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+    "imdbId": "tt4786824"
   },
   {
     "id": 12,
@@ -149,7 +160,8 @@
     "rating": "TV-MA",
     "description": "A Congressman works with his equally conniving wife to exact revenge on the people who betrayed him.",
     "image": "./_images/posters/house_of_cards.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+    "imdbId": "tt1856010"
   },
   {
     "id": 13,
@@ -161,7 +173,8 @@
     "rating": "PG-13",
     "description": "A noble family becomes embroiled in a war for control over the galaxy's most valuable asset while its heir becomes troubled by visions of a dark future.",
     "image": "./_images/posters/dune.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4",
+    "imdbId": "tt1160419"
   },
   {
     "id": 14,
@@ -174,7 +187,8 @@
     "rating": "TV-MA",
     "description": "Hundreds of cash-strapped players accept a strange invitation to compete in children's games for a tempting prize, but the stakes are deadly.",
     "image": "./_images/posters/squid_game.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "imdbId": "tt10919420"
   },
   {
     "id": 15,
@@ -187,7 +201,8 @@
     "rating": "TV-MA",
     "description": "A financial advisor drags his family from Chicago to the Missouri Ozarks, where he must launder money to appease a drug boss.",
     "image": "./_images/posters/ozark.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "imdbId": "tt5071412"
   },
   {
     "id": 16,
@@ -199,7 +214,8 @@
     "rating": "PG-13",
     "description": "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear.",
     "image": "./_images/posters/spider_man_no_way_home.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "imdbId": "tt10872600"
   },
   {
     "id": 17,
@@ -212,7 +228,8 @@
     "rating": "TV-MA",
     "description": "Orphaned at the tender age of nine, prodigious introvert Beth Harmon discovers and masters the game of chess in 1960s USA.",
     "image": "./_images/posters/the_queens_gambit.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+    "imdbId": "tt10048342"
   },
   {
     "id": 18,
@@ -225,7 +242,8 @@
     "rating": "TV-MA",
     "description": "Wealth, lust, and betrayal set in the backdrop of Regency era England, seen through the eyes of the powerful Bridgerton family.",
     "image": "./_images/posters/bridgerton.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+    "imdbId": "tt8740790"
   },
   {
     "id": 19,
@@ -237,7 +255,8 @@
     "rating": "PG-13",
     "description": "A detective investigates the death of a patriarch of an eccentric, combative family.",
     "image": "./_images/posters/knives_out.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    "imdbId": "tt8946378"
   },
   {
     "id": 20,
@@ -250,7 +269,8 @@
     "rating": "TV-MA",
     "description": "A look at life for a group of high school students as they grapple with issues of drugs, relationships, and trauma.",
     "image": "./_images/posters/euphoria.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+    "imdbId": "tt8772296"
   },
   {
     "id": 21,
@@ -262,7 +282,8 @@
     "rating": "PG",
     "description": "A Colombian teenage girl has to face the frustration of being the only member of her family without magical powers.",
     "image": "./_images/posters/encanto.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+    "imdbId": "tt2953050"
   },
   {
     "id": 22,
@@ -275,7 +296,8 @@
     "rating": "TV-14",
     "description": "A family of former child heroes, now grown apart, must reunite to continue to protect the world.",
     "image": "./_images/posters/the_umbrella_academy.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+    "imdbId": "tt1312171"
   },
   {
     "id": 23,
@@ -287,7 +309,8 @@
     "rating": "PG-13",
     "description": "James Bond has left active service. His peace is short-lived when Felix Leiter, an old friend from the CIA, turns up asking for help.",
     "image": "./_images/posters/no_time_to_die.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+    "imdbId": "tt2382320"
   },
   {
     "id": 24,
@@ -300,6 +323,7 @@
     "rating": "TV-MA",
     "description": "A young American woman from the Midwest is hired by a marketing firm in Paris to provide them with an American perspective on things.",
     "image": "./_images/posters/emily_in_paris.jpg",
-    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4"
+    "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+    "imdbId": "tt8962124"
   }
 ]

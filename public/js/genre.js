@@ -214,9 +214,9 @@ async function loadContent() {
 
     try {
         // Build query parameters
+        // Note: limit is not specified here so backend will use ITEMS_PER_PAGE env var
         const params = new URLSearchParams({
             page: currentPage,
-            limit: process.env.ITEMS_PER_PAGE || 12,
             sort: currentSort,
             watched: currentWatchedFilter,
             profileId: profileId
@@ -305,6 +305,30 @@ function createContentCard(item) {
         additionalInfo = item.duration;
     }
 
+    // Build OMDB ratings display
+    let omdbRatingsHtml = '';
+    if (item.omdbRatings && item.omdbRatings.imdbRating) {
+        omdbRatingsHtml = `
+            <div class="content-details omdb-ratings">
+                <span class="imdb-rating" title="IMDB Rating">
+                    <i class="bi bi-star-fill"></i> ${item.omdbRatings.imdbRating}/10
+                </span>
+                ${item.omdbRatings.rottenTomatoes ? `
+                    <span>•</span>
+                    <span class="rt-rating" title="Rotten Tomatoes">
+                        🍅 ${item.omdbRatings.rottenTomatoes}
+                    </span>
+                ` : ''}
+                ${item.omdbRatings.metascore ? `
+                    <span>•</span>
+                    <span class="meta-rating" title="Metascore">
+                        📊 ${item.omdbRatings.metascore}/100
+                    </span>
+                ` : ''}
+            </div>
+        `;
+    }
+
     card.innerHTML = `
         <div class="content-image-container">
             <img src="${item.image}" alt="${item.name}" class="content-image">
@@ -330,6 +354,7 @@ function createContentCard(item) {
                 <span class="content-genre">${item.genre}</span>
                 ${additionalInfo ? `<span>•</span><span>${additionalInfo}</span>` : ''}
             </div>
+            ${omdbRatingsHtml}
             <p class="content-description">${item.description}</p>
         </div>
     `;

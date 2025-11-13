@@ -197,7 +197,8 @@ async function loadLikeStatus(contentId) {
         const response = await fetch(`/api/profiles/${currentProfile.id}/likes`);
         if (response.ok) {
             const data = await response.json();
-            isLiked = data.data.includes(parseInt(contentId));
+            const likes = data.data?.likes || data.data || [];
+            isLiked = likes.includes(parseInt(contentId));
         } else {
             isLiked = false;
         }
@@ -223,6 +224,9 @@ function displayContentInfo() {
             `${currentContent.seasons} Season${currentContent.seasons > 1 ? 's' : ''} • ${currentContent.episodes} Episodes`;
     }
 
+    // Display OMDB ratings if available
+    displayOmdbRatings();
+
     // Set hero background
     const heroBackground = document.getElementById('heroBackground');
     heroBackground.style.backgroundImage = `url('${currentContent.image}')`;
@@ -235,6 +239,66 @@ function displayContentInfo() {
 
     // Configure like button
     configureLikeButton();
+}
+
+// Display OMDB ratings
+function displayOmdbRatings() {
+    const descriptionElement = document.getElementById('contentDescription');
+
+    // Remove existing OMDB ratings if any
+    const existingRatings = document.getElementById('omdbRatings');
+    if (existingRatings) {
+        existingRatings.remove();
+    }
+
+    // Check if OMDB ratings exist
+    if (!currentContent.omdbRatings || !currentContent.omdbRatings.imdbRating) {
+        return;
+    }
+
+    // Create OMDB ratings container
+    const ratingsDiv = document.createElement('div');
+    ratingsDiv.id = 'omdbRatings';
+    ratingsDiv.className = 'omdb-ratings-details';
+    ratingsDiv.style.cssText = 'margin-top: 1rem; display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.95rem;';
+
+    // Build ratings HTML
+    let ratingsHTML = '';
+
+    if (currentContent.omdbRatings.imdbRating) {
+        ratingsHTML += `
+            <div class="rating-item" style="display: flex; align-items: center; gap: 0.5rem;">
+                <i class="bi bi-star-fill" style="color: #f5c518;"></i>
+                <span style="font-weight: 600;">${currentContent.omdbRatings.imdbRating}/10</span>
+                <span style="color: #aaa;">IMDB</span>
+            </div>
+        `;
+    }
+
+    if (currentContent.omdbRatings.rottenTomatoes) {
+        ratingsHTML += `
+            <div class="rating-item" style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.2rem;">🍅</span>
+                <span style="font-weight: 600;">${currentContent.omdbRatings.rottenTomatoes}</span>
+                <span style="color: #aaa;">Rotten Tomatoes</span>
+            </div>
+        `;
+    }
+
+    if (currentContent.omdbRatings.metascore) {
+        ratingsHTML += `
+            <div class="rating-item" style="display: flex; align-items: center; gap: 0.5rem;">
+                <span style="font-size: 1.2rem;">📊</span>
+                <span style="font-weight: 600;">${currentContent.omdbRatings.metascore}/100</span>
+                <span style="color: #aaa;">Metascore</span>
+            </div>
+        `;
+    }
+
+    ratingsDiv.innerHTML = ratingsHTML;
+
+    // Insert after description
+    descriptionElement.after(ratingsDiv);
 }
 
 // Configure action buttons based on viewing status

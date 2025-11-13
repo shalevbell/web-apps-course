@@ -61,6 +61,39 @@ const contentSchema = new mongoose.Schema({
     type: String,
     required: false,
     default: null
+  },
+  // OMDB integration fields
+  imdbId: {
+    type: String,
+    required: false,
+    trim: true,
+    index: true
+  },
+  omdbRatings: {
+    imdbRating: {
+      type: Number,
+      required: false
+    },
+    imdbVotes: {
+      type: String,
+      required: false
+    },
+    metascore: {
+      type: Number,
+      required: false
+    },
+    rottenTomatoes: {
+      type: String,
+      required: false
+    },
+    awards: {
+      type: String,
+      required: false
+    }
+  },
+  omdbUpdatedAt: {
+    type: Date,
+    required: false
   }
 }, {
   timestamps: true
