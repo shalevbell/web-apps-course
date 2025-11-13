@@ -1,5 +1,8 @@
 // Settings page functionality
 let profiles = [];
+let dailyViewsChart = null;
+let genrePopularityChart = null;
+
 function getCurrentUserId() {
     return window.currentUser?.id || null;
 }
@@ -12,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadUserInfo(user);
     await loadProfiles(user.id);
     setupEventListeners();
+    await loadStatistics(user.id);
     // Initial form state will be set after profiles load
 });
 
@@ -633,4 +637,259 @@ function updateAddProfileFormState() {
         addProfileBtn.disabled = false;
         addProfileBtn.classList.remove('disabled');
     }
+}
+
+// Statistics functions
+async function loadStatistics(userId) {
+    const statisticsLoading = document.getElementById('statisticsLoading');
+    const statisticsContent = document.getElementById('statisticsContent');
+    const statisticsEmpty = document.getElementById('statisticsEmpty');
+    const statisticsError = document.getElementById('statisticsError');
+
+    // Show loading state
+    statisticsLoading.style.display = 'flex';
+    statisticsContent.style.display = 'none';
+    statisticsEmpty.style.display = 'none';
+    statisticsError.style.display = 'none';
+
+    if (!userId) {
+        userId = getCurrentUserId();
+        if (!userId) {
+            const user = await checkAuth(false);
+            if (!user) {
+                statisticsLoading.style.display = 'none';
+                statisticsError.style.display = 'block';
+                return;
+            }
+            userId = user.id;
+        }
+    }
+
+    try {
+        const response = await fetch(`/api/users/${userId}/statistics`, {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            statisticsLoading.style.display = 'none';
+
+            // Check if we have data
+            const hasDailyViews = data.data?.dailyViews?.length > 0;
+            const hasGenreData = data.data?.genrePopularity?.length > 0;
+
+            if (!hasDailyViews && !hasGenreData) {
+                statisticsEmpty.style.display = 'block';
+                return;
+            }
+
+            // Render charts
+            if (hasDailyViews) {
+                renderBarChart(data.data.dailyViews);
+            }
+            if (hasGenreData) {
+                renderPieChart(data.data.genrePopularity);
+            }
+
+            statisticsContent.style.display = 'block';
+        } else {
+            statisticsLoading.style.display = 'none';
+            statisticsError.style.display = 'block';
+            console.error('Failed to load statistics:', data.error);
+        }
+    } catch (error) {
+        statisticsLoading.style.display = 'none';
+        statisticsError.style.display = 'block';
+        console.error('Error loading statistics:', error);
+    }
+}
+
+function renderBarChart(dailyViewsData) {
+    // Destroy existing chart if it exists
+    if (dailyViewsChart) {
+        dailyViewsChart.destroy();
+    }
+
+    // Generate last 30 days date labels (format as MM/DD)
+    const today = new Date();
+    const dateLabels = [];
+    for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        dateLabels.push(`${month}/${day}`);
+    }
+
+    // Create datasets for each profile
+    const datasets = dailyViewsData.map((profileData, index) => {
+        // Extract counts for each date in order
+        const counts = profileData.dates.map(d => d.count);
+
+        // Diverse color palette for easy differentiation
+        const colors = [
+            '#e50914', // ed
+            '#2196f3', // Blue
+            '#4caf50', // Green
+            '#ff9800', // Orange
+            '#9c27b0'  // Purple
+        ];
+
+        return {
+            label: profileData.profileName,
+            data: counts,
+            backgroundColor: colors[index % colors.length],
+            borderColor: colors[index % colors.length],
+            borderWidth: 1
+        };
+    });
+
+    const ctx = document.getElementById('dailyViewsChart');
+    dailyViewsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: dateLabels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        color: '#ffffff',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: function(context) {
+                            return `Date: ${context[0].label}`;
+                        },
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.parsed.y} views`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#8c8c8c',
+                        maxRotation: 45,
+                        minRotation: 45
+                    },
+                    grid: {
+                        color: '#333'
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#8c8c8c',
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: '#333'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderPieChart(genreData) {
+    // Destroy existing chart if it exists
+    if (genrePopularityChart) {
+        genrePopularityChart.destroy();
+    }
+
+    // Extract labels and data
+    const labels = genreData.map(item => item.genre);
+    const counts = genreData.map(item => item.count);
+
+    // Diverse color palette optimized for dark backgrounds and easy differentiation
+    const colorPalette = [
+        '#e50914', // Netflix red
+        '#2196f3', // Blue
+        '#4caf50', // Green
+        '#ff9800', // Orange
+        '#9c27b0', // Purple
+        '#00bcd4', // Cyan
+        '#ffeb3b', // Yellow
+        '#e91e63', // Pink
+        '#009688', // Teal
+        '#ff5722', // Deep orange
+        '#3f51b5', // Indigo
+        '#8bc34a', // Light green
+        '#ffc107', // Amber
+        '#673ab7', // Deep purple
+        '#03a9f4', // Light blue
+        '#795548', // Brown
+        '#607d8b', // Blue gray
+        '#cddc39', // Lime
+        '#ff4081', // Pink accent
+        '#00e676', // Green accent
+        '#ff6f00', // Deep orange
+        '#651fff', // Deep purple accent
+        '#ff1744', // Red accent
+        '#3d5afe', // Indigo accent
+        '#1de9b6', // Teal accent
+        '#f50057'  // Pink accent 2
+    ];
+    
+    // Assign colors to genres, cycling through palette if needed
+    const colors = labels.map((_, index) => colorPalette[index % colorPalette.length]);
+
+    const ctx = document.getElementById('genrePopularityChart');
+    genrePopularityChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: colors,
+                borderColor: '#1a1a1a',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        color: '#ffffff',
+                        font: {
+                            size: 12
+                        },
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} views (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }

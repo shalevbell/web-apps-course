@@ -43,14 +43,28 @@ const register = async (req, res) => {
 
     await user.save();
 
-    // Return user data (without password)
-    const userData = {
-      id: user._id,
+    const isAdmin = process.env.ADMIN_EMAIL
+      ? user.email === process.env.ADMIN_EMAIL
+      : false;
+
+    // Auto-login user after registration
+    req.session.authenticated = true;
+    req.session.user = {
+      id: user._id.toString(),
       email: user.email,
-      username: user.username
+      username: user.username,
+      isAdmin
     };
 
-    logger.info(`[AUTH] User registered successfully: ${email} (${username})`);
+    // Return user data (without password)
+    const userData = {
+      id: user._id.toString(),
+      email: user.email,
+      username: user.username,
+      isAdmin
+    };
+
+    logger.info(`[AUTH] User registered and auto-logged in successfully: ${email} (${username})`);
     sendSuccess(res, userData, 'User registered successfully', 201);
   } catch (error) {
     logger.error(`[AUTH] Registration error: ${error.message}`);

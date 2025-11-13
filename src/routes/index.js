@@ -176,6 +176,9 @@ router.post('/profiles/:profileId/viewing-history', [
 // Delete viewing history
 router.delete('/profiles/:profileId/viewing-history/:contentId', requireAuth, viewingHistoryController.deleteProgress);
 
+// Get user statistics
+router.get('/users/:userId/statistics', requireAuth, viewingHistoryController.getStatistics);
+
 // ============================================
 // Admin Routes
 // ============================================

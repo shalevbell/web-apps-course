@@ -636,3 +636,41 @@ body {
         height: 45px;
     }
 }
+
+/* Statistics section styles */
+.chart-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: white;
+    text-align: center;
+}
+
+.statistics-chart-container {
+    padding: 20px;
+    min-height: 300px;
+    position: relative;
+}
+
+#dailyViewsChart,
+#genrePopularityChart {
+    max-height: 400px;
+    width: 100% !important;
+    height: auto !important;
+}
+
+@media (max-width: 768px) {
+    .statistics-chart-container {
+        min-height: 250px;
+        padding: 15px;
+    }
+
+    #dailyViewsChart,
+    #genrePopularityChart {
+        max-height: 300px;
+    }
+
+    .chart-title {
+        font-size: 1rem;
+    }
+}
