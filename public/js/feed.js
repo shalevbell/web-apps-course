@@ -215,7 +215,7 @@ function renderContentSections() {
             </div>
         `;
     } else {
-        // Popular Content Section (if available)
+        // 1. Most Popular Section (if available)
         if (popularContentData.length > 0) {
             mainContent.innerHTML += `
                 <h2 class="section-title">Most Popular</h2>
@@ -225,7 +225,42 @@ function renderContentSections() {
             `;
         }
 
-        // Newest Content by Genre Sections
+        // Group content by type and categories
+        const trending = contentData.filter(item => item.year >= 2020);
+        const series = contentData.filter(item => item.type === 'series');
+        const movies = contentData.filter(item => item.type === 'movie');
+
+        // 2. Trending Now Section
+        if (trending.length > 0) {
+            mainContent.innerHTML += `
+                <h2 class="section-title">Trending Now</h2>
+                <div class="content-row">
+                    ${trending.map(item => createContentItemHTML(item)).join('')}
+                </div>
+            `;
+        }
+
+        // 3. TV Shows Section
+        if (series.length > 0) {
+            mainContent.innerHTML += `
+                <h2 class="section-title">TV Shows</h2>
+                <div class="content-row">
+                    ${series.map(item => createContentItemHTML(item)).join('')}
+                </div>
+            `;
+        }
+
+        // 4. Movies Section
+        if (movies.length > 0) {
+            mainContent.innerHTML += `
+                <h2 class="section-title">Movies</h2>
+                <div class="content-row">
+                    ${movies.map(item => createContentItemHTML(item)).join('')}
+                </div>
+            `;
+        }
+
+        // 5. Newest Content by Genre Sections
         const genres = Object.keys(newestContentByGenre);
         genres.forEach(genre => {
             const genreContent = newestContentByGenre[genre];
@@ -238,39 +273,6 @@ function renderContentSections() {
                 `;
             }
         });
-
-        // Group remaining content by type and other categories
-        const series = contentData.filter(item => item.type === 'series');
-        const movies = contentData.filter(item => item.type === 'movie');
-        const trending = contentData.filter(item => item.year >= 2020);
-
-        // Create sections
-        if (trending.length > 0) {
-            mainContent.innerHTML += `
-                <h2 class="section-title">Trending Now</h2>
-                <div class="content-row">
-                    ${trending.map(item => createContentItemHTML(item)).join('')}
-                </div>
-            `;
-        }
-
-        if (series.length > 0) {
-            mainContent.innerHTML += `
-                <h2 class="section-title">TV Shows</h2>
-                <div class="content-row">
-                    ${series.map(item => createContentItemHTML(item)).join('')}
-                </div>
-            `;
-        }
-
-        if (movies.length > 0) {
-            mainContent.innerHTML += `
-                <h2 class="section-title">Movies</h2>
-                <div class="content-row">
-                    ${movies.map(item => createContentItemHTML(item)).join('')}
-                </div>
-            `;
-        }
     }
 
     // Add click events for like buttons
