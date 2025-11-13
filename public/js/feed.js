@@ -371,16 +371,6 @@ function renderContentSections() {
     document.querySelectorAll('.content-item').forEach(item => {
         item.addEventListener('click', handleContentClick);
     });
-
-    // Add click events for continue watching play buttons
-    document.querySelectorAll('.continue-watching-play-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const contentId = btn.getAttribute('data-content-id');
-            const resumeTime = btn.getAttribute('data-resume-time');
-            window.location.href = `player.html?contentId=${contentId}&startTime=${resumeTime}`;
-        });
-    });
 }
 
 // Function to create HTML for a content item
@@ -455,9 +445,6 @@ function createContinueWatchingItemHTML(historyItem) {
                     <div class="continue-watching-progress-fill" style="width: ${progressPercent}%"></div>
                 </div>
                 <div class="continue-watching-overlay">
-                    <button class="continue-watching-play-btn" data-content-id="${content.id}" data-resume-time="${Math.floor(historyItem.currentTime)}">
-                        <i class="bi bi-play-fill"></i>
-                    </button>
                     <span class="continue-watching-time">${timeRemainingText}</span>
                 </div>
             </div>

@@ -84,6 +84,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Set up event listeners
         setupEventListeners();
 
+        // Reload viewing history when page becomes visible (user navigates back)
+        document.addEventListener('visibilitychange', async () => {
+            if (!document.hidden && currentContent) {
+                console.log('Page became visible - reloading viewing history...');
+                await loadViewingHistory(currentContent.id);
+                configureActionButtons();
+            }
+        });
+
     } catch (error) {
         console.error('Error initializing page:', error);
         showError(error.message);
@@ -181,8 +190,16 @@ async function loadViewingHistory(contentId) {
         const response = await fetch(`/api/profiles/${currentProfile.id}/viewing-history/${contentId}`);
         if (response.ok) {
             const data = await response.json();
+            console.log('API response:', data);
             viewingHistory = data.data;
+            console.log('Viewing history loaded:', JSON.stringify(viewingHistory, null, 2));
+            if (viewingHistory && viewingHistory.currentTime > 0) {
+                console.log(`✓ Found viewing progress: ${Math.floor(viewingHistory.currentTime)}s / ${Math.floor(viewingHistory.duration)}s`);
+            } else {
+                console.log(`⚠ No progress or currentTime is 0. Full object:`, viewingHistory);
+            }
         } else {
+            console.log('No viewing history found (API returned error)');
             viewingHistory = null;
         }
     } catch (error) {
@@ -308,6 +325,11 @@ function configureActionButtons() {
     const restartButton = document.getElementById('restartButton');
     const watchAgainButton = document.getElementById('watchAgainButton');
 
+    console.log('Configuring action buttons. Viewing history:', viewingHistory);
+    console.log('→ currentTime:', viewingHistory?.currentTime);
+    console.log('→ completed:', viewingHistory?.completed);
+    console.log('→ duration:', viewingHistory?.duration);
+
     // Hide all buttons first
     [playButton, resumeButton, restartButton, watchAgainButton].forEach(btn => {
         btn.style.display = 'none';
@@ -315,16 +337,20 @@ function configureActionButtons() {
 
     if (!viewingHistory) {
         // Never watched - show Play button
+        console.log('→ Showing Play button (no viewing history)');
         playButton.style.display = 'inline-block';
     } else if (viewingHistory.completed) {
         // Completed - show Watch Again button
+        console.log('→ Showing Watch Again button (completed)');
         watchAgainButton.style.display = 'inline-block';
     } else if (viewingHistory.currentTime > 0) {
         // Partially watched - show Resume and Restart buttons
+        console.log(`→ Showing Resume and Restart buttons (at ${Math.floor(viewingHistory.currentTime)}s)`);
         resumeButton.style.display = 'inline-block';
         restartButton.style.display = 'inline-block';
     } else {
         // No progress - show Play button
+        console.log(`→ Showing Play button (currentTime = ${viewingHistory?.currentTime || 0})`);
         playButton.style.display = 'inline-block';
     }
 }
