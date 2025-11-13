@@ -359,6 +359,26 @@ body {
     object-fit: cover;
 }
 
+.admin-btn {
+    color: white;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: rgba(229, 9, 20, 0.1);
+    border: 1px solid rgba(229, 9, 20, 0.3);
+}
+
+.admin-btn:hover {
+    color: #e50914;
+    background: rgba(229, 9, 20, 0.2);
+    border-color: #e50914;
+}
+
 .logout-btn {
     color: white;
     text-decoration: none;
@@ -543,8 +563,13 @@ body {
         gap: 10px;
     }
 
+    .admin-btn span,
     .logout-btn span {
         display: none;
+    }
+
+    .admin-btn {
+        padding: 8px;
     }
 
     .main-content {

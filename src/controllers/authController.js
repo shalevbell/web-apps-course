@@ -34,18 +34,20 @@ const register = async (req, res) => {
       }
     }
 
+    // Check if this should be an admin user
+    const isAdmin = process.env.ADMIN_EMAIL
+      ? email === process.env.ADMIN_EMAIL
+      : false;
+
     // Create new user
     const user = new User({
       email,
       username,
-      password
+      password,
+      isAdmin
     });
 
     await user.save();
-
-    const isAdmin = process.env.ADMIN_EMAIL
-      ? user.email === process.env.ADMIN_EMAIL
-      : false;
 
     // Auto-login user after registration
     req.session.authenticated = true;
