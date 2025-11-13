@@ -47,15 +47,15 @@ class AdminPanel {
     async checkAuthentication() {
         try {
             const response = await fetch('/api/auth/me');
-            const data = await response.json();
+            const result = await response.json();
 
-            if (!response.ok || !data.user?.isAdmin) {
+            if (!response.ok || !result.data?.isAdmin) {
                 this.redirectToLogin();
                 return;
             }
 
             // Update UI with admin info
-            this.updateAdminInfo(data.user);
+            this.updateAdminInfo(result.data);
         } catch (error) {
             console.error('Authentication check failed:', error);
             this.redirectToLogin();

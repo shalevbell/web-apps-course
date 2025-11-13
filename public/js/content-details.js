@@ -103,17 +103,25 @@ async function loadUserSession() {
         const userData = await userResponse.json();
 
         // Get current profile from localStorage
-        const profileData = localStorage.getItem('currentProfile');
-        if (!profileData) {
+        const profileId = localStorage.getItem('selectedProfileId') || localStorage.getItem('activeProfileId');
+        const profileName = localStorage.getItem('selectedProfileName');
+        const profileAvatar = localStorage.getItem('selectedProfileAvatar');
+
+        if (!profileId) {
             window.location.href = '/profiles.html';
             return;
         }
 
-        currentProfile = JSON.parse(profileData);
+        // Construct currentProfile object from localStorage items
+        currentProfile = {
+            id: profileId,
+            name: profileName,
+            avatar: profileAvatar
+        };
 
         // Update navigation
         document.getElementById('navProfileName').textContent = currentProfile.name;
-        document.getElementById('navProfileAvatar').src = `./_images/profile_pics/${currentProfile.avatar}`;
+        document.getElementById('navProfileAvatar').src = `./_images/profile/${currentProfile.avatar}`;
 
     } catch (error) {
         console.error('Error loading user session:', error);
@@ -500,13 +508,13 @@ function setupEventListeners() {
 // Play content
 function playContent(resume = false) {
     const startTime = (resume && viewingHistory) ? viewingHistory.currentTime : 0;
-    const playerUrl = `player.html?id=${currentContent.id}&startTime=${startTime}`;
+    const playerUrl = `player.html?contentId=${currentContent.id}&startTime=${startTime}`;
     window.location.href = playerUrl;
 }
 
 // Play specific episode
 function playEpisode(season, episode) {
-    const playerUrl = `player.html?id=${currentContent.id}&season=${season}&episode=${episode}`;
+    const playerUrl = `player.html?contentId=${currentContent.id}&season=${season}&episode=${episode}`;
     window.location.href = playerUrl;
 }
 
