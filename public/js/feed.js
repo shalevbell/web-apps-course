@@ -255,8 +255,8 @@ function renderHeroSection() {
 
     if (infoBtn) {
         infoBtn.addEventListener('click', () => {
-            // For now, also navigate to player (could be a details page in future)
-            window.location.href = `player.html?contentId=${heroContent.id}`;
+            // Navigate to content details page
+            window.location.href = `content-details.html?id=${heroContent.id}`;
         });
     }
 }
