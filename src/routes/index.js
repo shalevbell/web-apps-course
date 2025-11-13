@@ -146,6 +146,9 @@ router.get('/content/likes', requireAuth, profileController.getGlobalLikeCounts)
 // Get similar content
 router.get('/content/similar/:contentId', requireAuth, contentController.getSimilarContent);
 
+// Get personalized recommendations for a profile
+router.get('/profiles/:profileId/recommendations', requireAuth, contentController.getPersonalizedRecommendations);
+
 // ============================================
 // Viewing History Routes
 // ============================================

@@ -1,6 +1,7 @@
 let contentData = [];
 let popularContentData = [];
 let newestContentByGenre = {};
+let recommendedContentData = [];
 let currentView = 'categorized'; // categorized/alphabetical
 let profileLikes = []; // User's liked content IDs
 let globalLikeCounts = {}; // Global like counts for all content
@@ -63,9 +64,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load content data first
     await loadContentData();
 
-    // Load popular and newest content data
+    // Load popular, newest, and recommended content data
     await loadPopularContent();
     await loadNewestContentByGenre();
+    await loadRecommendedContent();
 
     // Load likes data before rendering content
     await loadLikesData();
@@ -122,6 +124,22 @@ async function loadNewestContentByGenre() {
     } catch (error) {
         console.error('Error loading newest content by genre:', error);
         newestContentByGenre = {};
+    }
+}
+
+// Function to load personalized recommendations from API
+async function loadRecommendedContent() {
+    const profileId = getProfileId();
+    try {
+        const response = await fetch(`/api/profiles/${profileId}/recommendations?limit=10`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        recommendedContentData = result.data || [];
+    } catch (error) {
+        console.error('Error loading recommended content:', error);
+        recommendedContentData = [];
     }
 }
 
@@ -215,7 +233,19 @@ function renderContentSections() {
             </div>
         `;
     } else {
-        // 1. Most Popular Section (if available)
+        // 1. Recommended for You Section (personalized)
+        if (recommendedContentData.length > 0) {
+            mainContent.innerHTML += `
+                <h2 class="section-title">
+                    <i class="bi bi-star-fill me-2" style="color: #e50914;"></i>Recommended for You
+                </h2>
+                <div class="content-row">
+                    ${recommendedContentData.map(item => createContentItemHTML(item)).join('')}
+                </div>
+            `;
+        }
+
+        // 2. Most Popular Section (if available)
         if (popularContentData.length > 0) {
             mainContent.innerHTML += `
                 <h2 class="section-title">Most Popular</h2>
@@ -230,7 +260,7 @@ function renderContentSections() {
         const series = contentData.filter(item => item.type === 'series');
         const movies = contentData.filter(item => item.type === 'movie');
 
-        // 2. Trending Now Section
+        // 3. Trending Now Section
         if (trending.length > 0) {
             mainContent.innerHTML += `
                 <h2 class="section-title">Trending Now</h2>
@@ -240,7 +270,7 @@ function renderContentSections() {
             `;
         }
 
-        // 3. TV Shows Section
+        // 4. TV Shows Section
         if (series.length > 0) {
             mainContent.innerHTML += `
                 <h2 class="section-title">TV Shows</h2>
@@ -250,7 +280,7 @@ function renderContentSections() {
             `;
         }
 
-        // 4. Movies Section
+        // 5. Movies Section
         if (movies.length > 0) {
             mainContent.innerHTML += `
                 <h2 class="section-title">Movies</h2>
@@ -260,7 +290,7 @@ function renderContentSections() {
             `;
         }
 
-        // 5. Newest Content by Genre Sections
+        // 6. Newest Content by Genre Sections
         const genres = Object.keys(newestContentByGenre);
         genres.forEach(genre => {
             const genreContent = newestContentByGenre[genre];
