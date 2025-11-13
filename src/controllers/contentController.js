@@ -170,14 +170,6 @@ const getSimilarContent = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllContent,
-  getPopularContent,
-  getNewestContentByGenre,
-  getSimilarContent
-};
-const mongoose = require('mongoose');
-const Content = require('../models/Content');
 const ViewingHistory = require('../models/ViewingHistory');
 const { sendSuccess, sendError } = require('../utils/responses');
 
@@ -398,4 +390,14 @@ exports.getGenres = async (req, res) => {
     console.error('Error fetching genres:', error);
     sendError(res, 'Failed to fetch genres', 500);
   }
+};
+
+module.exports = {
+  getAllContent,
+  getPopularContent,
+  getNewestContentByGenre,
+  getSimilarContent,
+  getFilteredContent: exports.getFilteredContent,
+  getContentByGenre: exports.getContentByGenre,
+  getGenres: exports.getGenres
 };
