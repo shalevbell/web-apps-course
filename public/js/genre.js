@@ -205,7 +205,7 @@ async function loadContent() {
         // Build query parameters
         const params = new URLSearchParams({
             page: currentPage,
-            limit: 12,
+            limit: process.env.ITEMS_PER_PAGE || 12,
             sort: currentSort,
             watched: currentWatchedFilter,
             profileId: profileId
@@ -230,6 +230,7 @@ async function loadContent() {
         const responseData = data.data || data;
         const content = responseData.content || [];
         const pagination = responseData.pagination || { hasMore: false, totalCount: 0 };
+
 
         // Update state
         hasMore = pagination.hasMore;

@@ -63,7 +63,7 @@ async function seedAdminUser() {
     const admin = new User({
       email: 'admin@netflix-clone.com',
       username: 'admin',
-      password: 'admin123',
+      password: 'admin',
       isAdmin: true
     });
 

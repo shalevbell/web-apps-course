@@ -2,6 +2,7 @@ let contentData = [];
 let popularContentData = [];
 let newestContentByGenre = {};
 let recommendedContentData = [];
+let continueWatchingData = []; // Continue watching content with progress
 let currentView = 'categorized'; // categorized/alphabetical
 let profileLikes = []; // User's liked content IDs
 let globalLikeCounts = {}; // Global like counts for all content
@@ -68,6 +69,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadPopularContent();
     await loadNewestContentByGenre();
     await loadRecommendedContent();
+    
+    // Load continue watching data
+    await loadContinueWatching();
 
     // Load likes data before rendering content
     await loadLikesData();
@@ -140,6 +144,47 @@ async function loadRecommendedContent() {
     } catch (error) {
         console.error('Error loading recommended content:', error);
         recommendedContentData = [];
+    }
+}
+
+// Function to load continue watching content
+async function loadContinueWatching() {
+    const profileId = getProfileId();
+    if (!profileId) {
+        continueWatchingData = [];
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/profiles/${profileId}/viewing-history`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const result = await response.json();
+        const history = result.data || [];
+        
+        // Filter to only incomplete watches (not completed and has progress)
+        const incompleteWatches = history.filter(item => {
+            return !item.completed && item.currentTime > 0 && item.content;
+        });
+        
+        // Sort by last watched (most recent first)
+        incompleteWatches.sort((a, b) => {
+            const dateA = new Date(a.lastWatched || 0);
+            const dateB = new Date(b.lastWatched || 0);
+            return dateB - dateA;
+        });
+        
+        // Limit to 20 most recent
+        continueWatchingData = incompleteWatches.slice(0, 20);
+        
+    } catch (error) {
+        console.error('Error loading continue watching:', error);
+        continueWatchingData = [];
     }
 }
 
@@ -233,6 +278,18 @@ function renderContentSections() {
             </div>
         `;
     } else {
+        // 0. Continue Watching Section (should be first)
+        if (continueWatchingData.length > 0) {
+            mainContent.innerHTML += `
+                <h2 class="section-title">
+                    <i class="bi bi-play-circle-fill me-2" style="color: #e50914;"></i>Continue Watching
+                </h2>
+                <div class="content-row">
+                    ${continueWatchingData.map(item => createContinueWatchingItemHTML(item)).join('')}
+                </div>
+            `;
+        }
+
         // 1. Recommended for You Section (personalized)
         if (recommendedContentData.length > 0) {
             mainContent.innerHTML += `
@@ -314,6 +371,16 @@ function renderContentSections() {
     document.querySelectorAll('.content-item').forEach(item => {
         item.addEventListener('click', handleContentClick);
     });
+
+    // Add click events for continue watching play buttons
+    document.querySelectorAll('.continue-watching-play-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const contentId = btn.getAttribute('data-content-id');
+            const resumeTime = btn.getAttribute('data-resume-time');
+            window.location.href = `player.html?contentId=${contentId}&startTime=${resumeTime}`;
+        });
+    });
 }
 
 // Function to create HTML for a content item
@@ -341,6 +408,64 @@ function createContentItemHTML(item) {
                 <div><span class="content-year">${item.year}</span> • ${item.type}</div>
                 <div>${metaInfo}</div>
                 <div class="content-genre">${item.genre}</div>
+            </div>
+        </div>
+    `;
+}
+
+// Function to create HTML for continue watching item with progress indicator
+function createContinueWatchingItemHTML(historyItem) {
+    const content = historyItem.content;
+    if (!content) return '';
+
+    const progressPercent = historyItem.duration > 0 
+        ? Math.round((historyItem.currentTime / historyItem.duration) * 100)
+        : 0;
+    
+    const likeCount = getLikeCount(content.id);
+    const isLiked = isContentLiked(content.id);
+
+    // Create meta info based on content type
+    const metaInfo = content.type === 'series'
+        ? `${content.seasons} Season${content.seasons > 1 ? 's' : ''} • ${content.episodes} Episodes`
+        : content.duration;
+
+    // Format time remaining
+    const timeRemaining = historyItem.duration - historyItem.currentTime;
+    const hours = Math.floor(timeRemaining / 3600);
+    const minutes = Math.floor((timeRemaining % 3600) / 60);
+    let timeRemainingText = '';
+    if (hours > 0) {
+        timeRemainingText = `${hours}h ${minutes}m left`;
+    } else {
+        timeRemainingText = `${minutes}m left`;
+    }
+
+    return `
+        <div class="content-item continue-watching-item" data-id="${content.id}" data-title="${content.name}" data-type="${content.type}">
+            <div class="like-container">
+                <button class="like-btn ${isLiked ? 'liked' : ''}" data-id="${content.id}">
+                    <i class="bi ${isLiked ? 'bi-heart-fill' : 'bi-heart'}"></i>
+                </button>
+                <div class="like-count">${likeCount} ${likeCount === 1 ? 'like' : 'likes'}</div>
+            </div>
+            <div class="continue-watching-image-container">
+                <img src="${content.image}" alt="${content.name}" class="content-image">
+                <div class="continue-watching-progress-bar">
+                    <div class="continue-watching-progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+                <div class="continue-watching-overlay">
+                    <button class="continue-watching-play-btn" data-content-id="${content.id}" data-resume-time="${Math.floor(historyItem.currentTime)}">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                    <span class="continue-watching-time">${timeRemainingText}</span>
+                </div>
+            </div>
+            <div class="content-title">${content.name}</div>
+            <div class="content-details">
+                <div><span class="content-year">${content.year}</span> • ${content.type}</div>
+                <div>${metaInfo}</div>
+                <div class="content-genre">${content.genre}</div>
             </div>
         </div>
     `;

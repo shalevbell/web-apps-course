@@ -2,7 +2,7 @@
   {
     "email": "admin@netflix.com",
     "username": "admin",
-    "password": "admin123",
+    "password": "admin",
     "isAdmin": true,
     "profiles": [
       {

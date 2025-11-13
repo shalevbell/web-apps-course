@@ -37,8 +37,8 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     }
     
     // Password validation
-    if (password.value.length < 6) {
-        showError(password, passwordError, 'Password must be at least 6 characters long');
+    if (password.value.length < 5) {
+        showError(password, passwordError, 'Password must be at least 5 characters long');
         isValid = false;
     }
     
