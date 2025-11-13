@@ -14,38 +14,38 @@
 </head>
 <body>
     <!-- Video Player Container -->
-    <div class="player-container">
+    <main class="player-container" role="main" aria-label="Video player">
         <!-- Back Button -->
-        <div class="back-button-container">
-            <button id="backBtn" class="back-btn">
+        <nav class="back-button-container" role="navigation" aria-label="Navigation">
+            <button id="backBtn" class="back-btn" aria-label="Back to Browse">
                 <i class="bi bi-arrow-left"></i>
                 <span>Back to Browse</span>
             </button>
-        </div>
+        </nav>
 
         <!-- Video Element -->
-        <div class="video-wrapper">
-            <video id="videoPlayer" class="video-element" preload="metadata">
+        <section class="video-wrapper" role="application" aria-label="Video content">
+            <video id="videoPlayer" class="video-element" preload="metadata" aria-label="Video player">
                 <source id="videoSource" src="" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
 
             <!-- Loading Spinner -->
-            <div id="loadingSpinner" class="loading-spinner">
+            <div id="loadingSpinner" class="loading-spinner" aria-live="polite" aria-label="Loading video">
                 <div class="spinner-border text-danger" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
             </div>
 
             <!-- Video Controls Overlay -->
-            <div id="controlsOverlay" class="controls-overlay">
+            <aside id="controlsOverlay" class="controls-overlay" role="region" aria-label="Video controls">
                 <!-- Top Controls -->
-                <div class="top-controls">
+                <header class="top-controls">
                     <div class="content-info">
                         <h2 id="contentTitle" class="content-title"></h2>
                         <p id="contentDescription" class="content-description"></p>
                     </div>
-                </div>
+                </header>
 
                 <!-- Center Play/Pause Button -->
                 <div class="center-controls">

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix - Content Details</title>
+    <link rel="shortcut icon" href="./_images/netflix_assets/netflix_favicon.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./css/content-details.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header class="header">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <!-- Logo -->
+                <a class="brand me-4" href="feed.html">
+                    <img src="./_images/netflix_assets/netflix_logo.png" alt="Netflix logo" class="logo">
+                </a>
+                <!-- Navigation Menu -->
+                <nav class="d-lg-flex me-auto" role="navigation" aria-label="Main navigation">
+                    <ul class="nav-list navbar-nav me-auto d-flex flex-row">
+                        <li class="navigation-item">
+                            <a href="feed.html">Home</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a href="#" data-filter="series">TV Shows</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a href="#" data-filter="movie">Movies</a>
+                        </li>
+                        <li class="navigation-item">
+                            <a href="settings.html">Settings</a>
+                        </li>
+                    </ul>
+                </nav>
+                <!-- User Profile Section -->
+                <aside class="user-controls d-flex align-items-center" role="complementary" aria-label="User actions">
+                    <div class="profile-section">
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle profile-button" type="button" data-bs-toggle="dropdown">
+                                <img id="navProfileAvatar" src="" alt="Profile" class="profile-avatar">
+                                <span id="navProfileName" class="profile-name"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item" href="profiles.html">Manage Profiles</a></li>
+                                <li><a class="dropdown-item" href="settings.html">Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" id="logoutButton">Sign Out</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Details Section -->
+    <main class="content-details-main">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-overlay">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <div class="content-info">
+                                <h1 id="contentTitle" class="content-title">Loading...</h1>
+                                <div class="content-meta">
+                                    <span id="contentYear" class="meta-item"></span>
+                                    <span id="contentRating" class="meta-item rating"></span>
+                                    <span id="contentDuration" class="meta-item"></span>
+                                    <span id="contentGenre" class="meta-item genre-tags"></span>
+                                </div>
+                                <p id="contentDescription" class="content-description">Loading content information...</p>
+
+                                <!-- Action Buttons -->
+                                <div class="action-buttons">
+                                    <button id="playButton" class="btn btn-primary btn-lg play-btn">
+                                        <i class="bi bi-play-fill"></i> Play
+                                    </button>
+                                    <button id="resumeButton" class="btn btn-outline-light btn-lg resume-btn" style="display: none;">
+                                        <i class="bi bi-play-fill"></i> Resume
+                                    </button>
+                                    <button id="restartButton" class="btn btn-outline-light btn-lg restart-btn" style="display: none;">
+                                        <i class="bi bi-arrow-clockwise"></i> Watch from Beginning
+                                    </button>
+                                    <button id="watchAgainButton" class="btn btn-outline-light btn-lg watch-again-btn" style="display: none;">
+                                        <i class="bi bi-arrow-clockwise"></i> Watch Again
+                                    </button>
+                                    <button id="likeButton" class="btn btn-outline-light btn-icon like-btn">
+                                        <i class="bi bi-hand-thumbs-up"></i>
+                                    </button>
+                                    <button id="unlikeButton" class="btn btn-outline-light btn-icon unlike-btn" style="display: none;">
+                                        <i class="bi bi-hand-thumbs-up-fill"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="heroBackground" class="hero-background"></div>
+        </section>
+
+        <!-- Content Body -->
+        <div class="content-body">
+            <div class="container">
+                <div class="row">
+                    <!-- Main Content Column -->
+                    <div class="col-lg-8">
+                        <!-- Episodes Section (for series) -->
+                        <section id="episodesSection" class="episodes-section" style="display: none;">
+                            <h3 class="section-title">Episodes</h3>
+                            <div class="season-selector">
+                                <select id="seasonSelect" class="form-select season-select">
+                                    <option value="1">Season 1</option>
+                                </select>
+                            </div>
+                            <div id="episodesList" class="episodes-list">
+                                <!-- Episodes will be loaded here -->
+                            </div>
+                        </section>
+
+                        <!-- Cast & Crew Section -->
+                        <section id="castSection" class="cast-section">
+                            <h3 class="section-title">Cast</h3>
+                            <div id="castList" class="cast-list">
+                                <!-- Cast members will be loaded here -->
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Sidebar Column -->
+                    <div class="col-lg-4">
+                        <!-- Similar Content Section -->
+                        <section class="similar-content-section">
+                            <h3 class="section-title">More Like This</h3>
+                            <div id="similarContent" class="similar-content-grid">
+                                <!-- Similar content will be loaded here -->
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner-border text-danger" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="error-message alert alert-danger" style="display: none;">
+        <h4>Error Loading Content</h4>
+        <p id="errorText">Unable to load content details. Please try again later.</p>
+        <button class="btn btn-outline-danger" onclick="window.history.back()">Go Back</button>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="./js/content-details.js"></script>
+</body>
+</html>

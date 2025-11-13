@@ -98,3 +98,175 @@ body {
     color: #fff;
     border-color: #fff;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .netflix-logo {
+        height: 50px;
+        margin-bottom: 15px;
+    }
+
+    .profiles-container {
+        max-width: 95%;
+    }
+
+    .profiles-title {
+        font-size: 4.5vw;
+        margin-bottom: 30px;
+    }
+
+    .profiles-list {
+        gap: 3vw;
+        margin-bottom: 30px;
+    }
+
+    .profile {
+        width: 12vw;
+        min-width: 70px;
+        max-width: 120px;
+    }
+
+    .profile-name {
+        font-size: max(11px, 1.8vw);
+    }
+
+    .btn-manage-profiles {
+        font-size: max(11px, 1.8vw);
+        padding: 6px 20px;
+    }
+
+    .empty-state, .error-state {
+        padding: 30px;
+    }
+
+    .empty-state h3, .error-state h3 {
+        font-size: 1.5rem;
+    }
+
+    .empty-state p, .error-state p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        padding: 20px 0;
+        justify-content: flex-start;
+        padding-top: 10vh;
+    }
+
+    .netflix-logo {
+        height: 40px;
+        margin-bottom: 20px;
+    }
+
+    .profiles-container {
+        max-width: 100%;
+        padding: 0 15px;
+    }
+
+    .profiles-title {
+        font-size: 6vw;
+        margin-bottom: 25px;
+    }
+
+    .profiles-list {
+        flex-wrap: wrap;
+        gap: 4vw;
+        margin-bottom: 25px;
+        justify-content: center;
+    }
+
+    .profile {
+        width: 18vw;
+        min-width: 80px;
+        max-width: 100px;
+    }
+
+    .profile-name {
+        font-size: max(12px, 2.5vw);
+        margin-top: 8px;
+    }
+
+    .btn-manage-profiles {
+        font-size: max(12px, 2.2vw);
+        padding: 8px 16px;
+        margin-top: 15px;
+    }
+
+    .empty-state, .error-state {
+        padding: 20px;
+    }
+
+    .empty-state h3, .error-state h3 {
+        font-size: 1.3rem;
+    }
+
+    .empty-state p, .error-state p {
+        font-size: 0.85rem;
+    }
+
+    .empty-state .btn, .error-state .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding-top: 5vh;
+    }
+
+    .netflix-logo {
+        height: 35px;
+        margin-bottom: 15px;
+    }
+
+    .profiles-title {
+        font-size: 7vw;
+        margin-bottom: 20px;
+    }
+
+    .profiles-list {
+        gap: 5vw;
+        margin-bottom: 20px;
+    }
+
+    .profile {
+        width: 22vw;
+        min-width: 70px;
+        max-width: 90px;
+    }
+
+    .profile-name {
+        font-size: max(11px, 3vw);
+        margin-top: 6px;
+    }
+
+    .btn-manage-profiles {
+        font-size: max(11px, 2.5vw);
+        padding: 6px 12px;
+        letter-spacing: 1px;
+    }
+}
+
+@media (max-width: 320px) {
+    .profiles-title {
+        font-size: 8vw;
+    }
+
+    .profile {
+        width: 25vw;
+        min-width: 60px;
+        max-width: 80px;
+    }
+
+    .profile-name {
+        font-size: max(10px, 3.5vw);
+    }
+
+    .btn-manage-profiles {
+        font-size: max(10px, 3vw);
+        padding: 5px 10px;
+    }
+}

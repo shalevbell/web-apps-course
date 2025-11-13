@@ -7,6 +7,7 @@ const MongoStore = require('connect-mongo');
 const selfsigned = require('selfsigned');
 const connectDB = require('./src/config/db');
 const logger = require('./src/utils/logger');
+const { seedContent, seedAdminUser } = require('./src/utils/seedContent');
 const { seedContent } = require('./src/utils/seedContent');
 const { seedUsers } = require('./src/utils/seedUsers');
 const app = express();
@@ -103,10 +104,12 @@ const startServer = async () => {
   try {
     const dbConnected = await connectDB();
 
+    // Seed content and admin user into database if connected
     // Seed data into database if connected
     if (dbConnected) {
       await seedUsers();
       await seedContent();
+      await seedAdminUser();
     }
 
     const attrs = [{ name: 'commonName', value: 'localhost' }];

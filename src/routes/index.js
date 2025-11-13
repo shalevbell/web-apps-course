@@ -1,6 +1,5 @@
 const express = require('express');
 const { body } = require('express-validator');
-const mongoose = require('mongoose');
 const router = express.Router();
 
 // Import controllers
@@ -8,11 +7,9 @@ const authController = require('../controllers/authController');
 const profileController = require('../controllers/profileController');
 const viewingHistoryController = require('../controllers/viewingHistoryController');
 const contentController = require('../controllers/contentController');
+const adminController = require('../controllers/adminController');
 const validateRequest = require('../middleware/validateRequest');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
-
-// Import models
-const Content = require('../models/Content');
 
 // ============================================
 // API Routes
@@ -24,24 +21,13 @@ router.get('/health', (req, res) => {
 });
 
 // Get content data
-router.get('/content', requireAuth, async (req, res) => {
-  try {
-    // Check if database is connected
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({
-        error: 'Database not available',
-        message: 'Content data requires database connection'
-      });
-    }
+router.get('/content', requireAuth, contentController.getAllContent);
 
-    // Fetch all content from MongoDB, sorted by id
-    const contentData = await Content.find({}).sort({ id: 1 }).select('-__v -createdAt -updatedAt');
-    res.json(contentData);
-  } catch (error) {
-    console.error('Error fetching content from database:', error);
-    res.status(500).json({ error: 'Failed to load content data' });
-  }
-});
+// Get popular content (most liked)
+router.get('/content/popular', requireAuth, contentController.getPopularContent);
+
+// Get newest content by genre
+router.get('/content/newest-by-genre', requireAuth, contentController.getNewestContentByGenre);
 
 // Get all genres
 router.get('/genres', requireAuth, contentController.getGenres);
@@ -157,6 +143,9 @@ router.post('/profiles/:profileId/unlike', requireAuth, [
 // Get global like counts
 router.get('/content/likes', requireAuth, profileController.getGlobalLikeCounts);
 
+// Get similar content
+router.get('/content/similar/:contentId', requireAuth, contentController.getSimilarContent);
+
 // ============================================
 // Viewing History Routes
 // ============================================
@@ -186,5 +175,62 @@ router.post('/profiles/:profileId/viewing-history', [
 
 // Delete viewing history
 router.delete('/profiles/:profileId/viewing-history/:contentId', requireAuth, viewingHistoryController.deleteProgress);
+
+// ============================================
+// Admin Routes
+// ============================================
+
+// Get all content for admin management
+router.get('/admin/content', requireAdmin, adminController.getAllContentAdmin);
+
+// Create new content (with file uploads)
+router.post('/admin/content', requireAdmin, adminController.uploadFiles, [
+  body('name')
+    .isLength({ min: 1, max: 200 })
+    .withMessage('Content name must be between 1 and 200 characters')
+    .trim(),
+  body('year')
+    .isInt({ min: 1900, max: new Date().getFullYear() + 5 })
+    .withMessage('Year must be a valid year'),
+  body('genre')
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Genre is required and must be less than 100 characters')
+    .trim(),
+  body('type')
+    .isIn(['movie', 'series'])
+    .withMessage('Type must be either movie or series'),
+  body('description')
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Description must be between 1 and 1000 characters')
+    .trim(),
+  body('director')
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage('Director name must be less than 100 characters')
+    .trim(),
+  body('actors')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('Actors list must be less than 500 characters')
+    .trim(),
+  // Conditional validation for series
+  body('episodes')
+    .if(body('type').equals('series'))
+    .isInt({ min: 1 })
+    .withMessage('Episodes must be a positive number for series'),
+  body('seasons')
+    .if(body('type').equals('series'))
+    .isInt({ min: 1 })
+    .withMessage('Seasons must be a positive number for series'),
+  // Conditional validation for movies
+  body('duration')
+    .if(body('type').equals('movie'))
+    .isLength({ min: 1, max: 20 })
+    .withMessage('Duration is required for movies and must be less than 20 characters')
+    .trim()
+], validateRequest, adminController.createContent);
+
+// Delete content
+router.delete('/admin/content/:contentId', requireAdmin, adminController.deleteContent);
 
 module.exports = router;

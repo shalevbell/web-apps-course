@@ -22,7 +22,7 @@
                     <img src="./_images/netflix_assets/netflix_logo.png" alt="Netflix logo" class="logo">
                 </a>
                 <!-- Navigation Menu -->
-                <div class="d-lg-flex me-auto">
+                <nav class="d-lg-flex me-auto" role="navigation" aria-label="Main navigation">
                     <ul class="nav-list navbar-nav me-auto d-flex flex-row">
                         <li class="navigation-item">
                             <a href="feed.html">Home</a>
@@ -34,102 +34,104 @@
                             <a href="profiles.html">Profiles</a>
                         </li>
                         <li class="navigation-item active">
-                            <a href="settings.html">Settings</a>
+                            <a href="settings.html" aria-current="page">Settings</a>
                         </li>
                     </ul>
-                </div>
+                </nav>
                 <!-- Icons + profile -->
-                <div class="icons d-flex align-items-center">
-                    <a href="profiles.html" class="d-flex align-items-center header-icon">
+                <aside class="icons d-flex align-items-center" role="complementary" aria-label="User actions">
+                    <a href="profiles.html" class="d-flex align-items-center header-icon" aria-label="Switch profile">
                         <img alt="Profile" class="profile" id="profileImage">
                         <i class="bi bi-caret-down-fill ms-1" style="font-size: 10px;"></i>
                     </a>
-                    <a href="#" id="logoutBtn" class="logout-btn">
+                    <a href="#" id="logoutBtn" class="logout-btn" aria-label="Logout">
                         <i class="bi bi-box-arrow-right"></i>
                         <span>Logout</span>
                     </a>
-                </div>
+                </aside>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <main class="main-content" role="main">
         <div class="container">
-            <div class="row">
+            <header class="row">
                 <div class="col-12">
                     <h1 class="page-title">Settings</h1>
                 </div>
-            </div>
+            </header>
 
             <!-- Current User Section -->
-            <div class="row mb-5">
+            <section class="row mb-5" aria-labelledby="current-user-title">
                 <div class="col-12">
                     <div class="settings-card">
-                        <h2 class="card-title">Current User</h2>
+                        <h2 class="card-title" id="current-user-title">Current User</h2>
                         <div class="user-info">
-                            <div class="user-email" id="userEmail">Loading...</div>
+                            <div class="user-email" id="userEmail" aria-live="polite">Loading...</div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Your Profiles Section -->
-            <div class="row mb-5">
+            <section class="row mb-5" aria-labelledby="profiles-title">
                 <div class="col-12">
                     <div class="settings-card">
-                        <h2 class="card-title">Your Profiles</h2>
-                        <div class="profiles-grid" id="profilesGrid">
-                            <div class="loading-spinner">
+                        <h2 class="card-title" id="profiles-title">Your Profiles</h2>
+                        <div class="profiles-grid" id="profilesGrid" role="grid" aria-label="User profiles">
+                            <div class="loading-spinner" aria-live="polite">
                                 <i class="bi bi-arrow-clockwise"></i>
                                 <span>Loading profiles...</span>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
             <!-- Add New Profile Section -->
-            <div class="row">
+            <section class="row" aria-labelledby="add-profile-title">
                 <div class="col-12">
                     <div class="settings-card">
-                        <h2 class="card-title">Add New Profile</h2>
+                        <h2 class="card-title" id="add-profile-title">Add New Profile</h2>
                         <form id="addProfileForm">
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="profileName" class="form-label">Profile Name</label>
                                     <input type="text" class="form-control" id="profileName" placeholder="Enter profile name" required>
-                                    <div id="profileNameError" class="error-message"></div>
+                                    <div id="profileNameError" class="error-message" role="alert" aria-live="polite"></div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="profileAvatar" class="form-label">Avatar</label>
-                                    <div class="avatar-selection">
-                                        <div class="avatar-option">
-                                            <input type="radio" name="avatar" value="profile_pic_1.png" id="avatar1" required>
-                                            <label for="avatar1">
-                                                <img src="./_images/profile/profile_pic_1.png" alt="Avatar 1">
-                                            </label>
+                                    <fieldset>
+                                        <legend class="form-label">Avatar</legend>
+                                        <div class="avatar-selection" role="radiogroup" aria-label="Choose profile avatar">
+                                            <div class="avatar-option">
+                                                <input type="radio" name="avatar" value="profile_pic_1.png" id="avatar1" required>
+                                                <label for="avatar1">
+                                                    <img src="./_images/profile/profile_pic_1.png" alt="Avatar 1">
+                                                </label>
+                                            </div>
+                                            <div class="avatar-option">
+                                                <input type="radio" name="avatar" value="profile_pic_2.png" id="avatar2" required>
+                                                <label for="avatar2">
+                                                    <img src="./_images/profile/profile_pic_2.png" alt="Avatar 2">
+                                                </label>
+                                            </div>
+                                            <div class="avatar-option">
+                                                <input type="radio" name="avatar" value="profile_pic_3.png" id="avatar3" required>
+                                                <label for="avatar3">
+                                                    <img src="./_images/profile/profile_pic_3.png" alt="Avatar 3">
+                                                </label>
+                                            </div>
+                                            <div class="avatar-option">
+                                                <input type="radio" name="avatar" value="profile_pic_4.png" id="avatar4" required>
+                                                <label for="avatar4">
+                                                    <img src="./_images/profile/profile_pic_4.png" alt="Avatar 4">
+                                                </label>
+                                            </div>
                                         </div>
-                                        <div class="avatar-option">
-                                            <input type="radio" name="avatar" value="profile_pic_2.png" id="avatar2" required>
-                                            <label for="avatar2">
-                                                <img src="./_images/profile/profile_pic_2.png" alt="Avatar 2">
-                                            </label>
-                                        </div>
-                                        <div class="avatar-option">
-                                            <input type="radio" name="avatar" value="profile_pic_3.png" id="avatar3" required>
-                                            <label for="avatar3">
-                                                <img src="./_images/profile/profile_pic_3.png" alt="Avatar 3">
-                                            </label>
-                                        </div>
-                                        <div class="avatar-option">
-                                            <input type="radio" name="avatar" value="profile_pic_4.png" id="avatar4" required>
-                                            <label for="avatar4">
-                                                <img src="./_images/profile/profile_pic_4.png" alt="Avatar 4">
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div id="avatarError" class="error-message"></div>
+                                    </fieldset>
+                                    <div id="avatarError" class="error-message" role="alert" aria-live="polite"></div>
                                 </div>
                             </div>
                             <div class="text-end">
@@ -140,9 +142,9 @@
                         </form>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
-    </div>
+    </main>
 
     <!-- Edit Profile Modal -->
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">

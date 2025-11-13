@@ -87,9 +87,7 @@ const login = async (req, res) => {
       return sendError(res, 'Incorrect password', 401);
     }
 
-    const isAdmin = process.env.ADMIN_EMAIL
-      ? user.email === process.env.ADMIN_EMAIL
-      : false;
+    const isAdmin = user.isAdmin || false;
 
     // Store user data in session (without password)
     req.session.authenticated = true;
