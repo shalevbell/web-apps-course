@@ -47,6 +47,17 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load genres into dropdown
     await loadGenres();
 
+    // Read URL parameters and set initial filters
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam = urlParams.get('type');
+    if (typeParam === 'series' || typeParam === 'movie') {
+        currentType = typeParam;
+        const typeSelect = document.getElementById('typeSelect');
+        if (typeSelect) {
+            typeSelect.value = typeParam;
+        }
+    }
+
     // Load profile likes
     await loadProfileLikes();
 
@@ -222,11 +233,13 @@ async function loadContent() {
             credentials: 'include'
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            throw new Error('Failed to fetch content');
+            const errorMessage = data.error || data.message || 'Failed to fetch content';
+            throw new Error(errorMessage);
         }
 
-        const data = await response.json();
         const responseData = data.data || data;
         const content = responseData.content || [];
         const pagination = responseData.pagination || { hasMore: false, totalCount: 0 };
