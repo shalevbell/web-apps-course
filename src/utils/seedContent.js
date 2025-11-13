@@ -2,6 +2,58 @@ const fs = require('fs');
 const path = require('path');
 const Content = require('../models/Content');
 const User = require('../models/User');
+const omdbService = require('../services/omdbService');
+
+async function fetchOmdbRatings() {
+  try {
+    // Check if OMDB_API_KEY is set
+    if (!process.env.OMDB_API_KEY) {
+      console.log(`[${new Date().toISOString()}] OMDB_API_KEY not set. Skipping OMDB ratings fetch.`);
+      return { success: false, message: 'OMDB_API_KEY not set' };
+    }
+
+    // Find all content with IMDB IDs that don't have OMDB ratings yet
+    const contentsWithImdbIds = await Content.find({
+      imdbId: { $exists: true, $ne: null },
+      $or: [
+        { omdbRatings: { $exists: false } },
+        { 'omdbRatings.imdbRating': null }
+      ]
+    });
+
+    if (contentsWithImdbIds.length === 0) {
+      console.log(`[${new Date().toISOString()}] No content needs OMDB ratings update.`);
+      return { success: true, updated: 0 };
+    }
+
+    console.log(`[${new Date().toISOString()}] Fetching OMDB ratings for ${contentsWithImdbIds.length} content items...`);
+
+    let updated = 0;
+    let failed = 0;
+
+    for (const content of contentsWithImdbIds) {
+      try {
+        const omdbData = await omdbService.updateContentWithOmdbData(content, content.imdbId);
+        content.omdbRatings = omdbData.omdbRatings;
+        content.omdbUpdatedAt = omdbData.omdbUpdatedAt;
+        await content.save();
+        updated++;
+
+        // Add 1 second delay to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      } catch (error) {
+        failed++;
+        console.error(`[${new Date().toISOString()}] Failed to fetch OMDB data for ${content.name}:`, error.message);
+      }
+    }
+
+    console.log(`[${new Date().toISOString()}] OMDB ratings update complete. Updated: ${updated}, Failed: ${failed}`);
+    return { success: true, updated, failed };
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] Error fetching OMDB ratings:`, error.message);
+    return { success: false, error: error.message };
+  }
+}
 
 async function seedContent() {
   try {
@@ -10,6 +62,10 @@ async function seedContent() {
 
     if (contentCount > 0) {
       console.log(`[${new Date().toISOString()}] Content already seeded (${contentCount} items found). Skipping seed.`);
+
+      // Still try to fetch OMDB ratings if API key is available
+      await fetchOmdbRatings();
+
       return { success: true, seeded: false, count: contentCount };
     }
 
@@ -21,6 +77,10 @@ async function seedContent() {
     const result = await Content.insertMany(contentData);
 
     console.log(`[${new Date().toISOString()}] Successfully seeded ${result.length} content items to database.`);
+
+    // Fetch OMDB ratings for all content with IMDB IDs
+    await fetchOmdbRatings();
+
     return { success: true, seeded: true, count: result.length };
   } catch (error) {
     console.error(`[${new Date().toISOString()}] Error seeding content:`, error.message);
@@ -42,6 +102,10 @@ async function reseedContent() {
     const result = await Content.insertMany(contentData);
 
     console.log(`[${new Date().toISOString()}] Successfully reseeded ${result.length} content items to database.`);
+
+    // Fetch OMDB ratings for all content with IMDB IDs
+    await fetchOmdbRatings();
+
     return { success: true, count: result.length };
   } catch (error) {
     console.error(`[${new Date().toISOString()}] Error reseeding content:`, error.message);

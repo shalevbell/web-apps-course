@@ -8,6 +8,7 @@ const profileController = require('../controllers/profileController');
 const viewingHistoryController = require('../controllers/viewingHistoryController');
 const contentController = require('../controllers/contentController');
 const adminController = require('../controllers/adminController');
+const omdbController = require('../controllers/omdbController');
 const validateRequest = require('../middleware/validateRequest');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
@@ -181,6 +182,35 @@ router.delete('/profiles/:profileId/viewing-history/:contentId', requireAuth, vi
 
 // Get user statistics
 router.get('/users/:userId/statistics', requireAuth, viewingHistoryController.getStatistics);
+
+// ============================================
+// OMDB Integration Routes
+// ============================================
+
+// Search OMDB by title
+router.get('/omdb/search', requireAuth, omdbController.searchOmdb);
+
+// Get OMDB data by IMDB ID (without saving)
+router.get('/omdb/:imdbId', requireAuth, omdbController.getOmdbData);
+
+// Update single content with OMDB rating
+router.post('/content/:contentId/omdb-rating', requireAdmin, [
+  body('imdbId')
+    .notEmpty()
+    .withMessage('IMDB ID is required')
+    .matches(/^tt\d+$/)
+    .withMessage('IMDB ID must be in format tt1234567')
+], validateRequest, omdbController.updateContentRating);
+
+// Sync all content with existing IMDB IDs
+router.post('/omdb/sync-all', requireAdmin, omdbController.syncAllRatings);
+
+// Batch update multiple content items
+router.post('/omdb/batch-update', requireAdmin, [
+  body('updates')
+    .isArray({ min: 1 })
+    .withMessage('Updates must be a non-empty array')
+], validateRequest, omdbController.batchUpdateRatings);
 
 // ============================================
 // Admin Routes
