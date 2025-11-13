@@ -112,24 +112,24 @@ async function initializePlayer() {
             console.log('Using local path:', videoSrc);
         }
 
-        // Set video source
-        console.log('Setting video source to:', videoSrc);
-        videoSource.src = videoSrc;
-        videoPlayer.load();
-
-        // Load viewing progress
+        // Load viewing progress BEFORE loading video
         console.log('Loading viewing progress...');
         await loadViewingProgress();
-        
+
         // If startTime is provided in URL, use it (for continue watching)
         if (startTime) {
             resumeTime = parseInt(startTime);
             lastSavedTime = resumeTime;
         }
 
-        // Setup event listeners
+        // Setup event listeners BEFORE loading video
         console.log('Setting up event listeners...');
         setupEventListeners();
+
+        // Set video source and load (this will trigger loadedmetadata event)
+        console.log('Setting video source to:', videoSrc);
+        videoSource.src = videoSrc;
+        videoPlayer.load();
 
         console.log('=== Player initialized successfully ===');
         console.log(`Now playing: ${content.name} (ID: ${content.id})`);
@@ -205,6 +205,42 @@ async function saveViewingProgress() {
     }
 }
 
+// Save viewing progress synchronously (for page unload/navigation)
+// Uses sendBeacon to ensure data is sent even as page closes
+function saveViewingProgressSync() {
+    if (!profileId || !contentId) {
+        return;
+    }
+
+    const currentTime = Math.floor(videoPlayer.currentTime);
+    const duration = Math.floor(videoPlayer.duration);
+
+    // Don't save if no meaningful progress
+    if (currentTime < 1 || isNaN(duration)) {
+        return;
+    }
+
+    const completed = (duration - currentTime) < 30;
+
+    const data = JSON.stringify({
+        contentId: parseInt(contentId),
+        currentTime: currentTime,
+        duration: duration,
+        completed: completed
+    });
+
+    // Use sendBeacon for reliable sending during page unload
+    const blob = new Blob([data], { type: 'application/json' });
+    const sent = navigator.sendBeacon(`/api/profiles/${profileId}/viewing-history`, blob);
+
+    if (sent) {
+        lastSavedTime = currentTime;
+        console.log(`✓ Progress saved (beacon): ${formatTime(currentTime)} / ${formatTime(duration)}${completed ? ' [COMPLETED]' : ''}`);
+    } else {
+        console.warn('Failed to send progress beacon');
+    }
+}
+
 // Setup all event listeners
 function setupEventListeners() {
     // Video events
@@ -238,8 +274,18 @@ function setupEventListeners() {
     // Save progress periodically
     setInterval(saveViewingProgress, 10000); // Save every 10 seconds
 
+    // Save progress when page becomes hidden (user navigates away)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            console.log('Page hidden - saving progress...');
+            saveViewingProgressSync(); // Use synchronous save when navigating away
+        }
+    });
+
     // Save progress when leaving page
-    window.addEventListener('beforeunload', saveViewingProgress);
+    window.addEventListener('beforeunload', () => {
+        saveViewingProgressSync(); // Use synchronous save when leaving
+    });
 
     // Episodes button (only for series)
     const episodesBtn = document.getElementById('episodesBtn');
