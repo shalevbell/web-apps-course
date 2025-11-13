@@ -482,6 +482,81 @@ body {
     animation: heartPulse 0.3s ease-in-out;
 }
 
+/* Continue Watching Styles */
+.continue-watching-item {
+    position: relative;
+}
+
+.continue-watching-image-container {
+    position: relative;
+    width: 100%;
+}
+
+.continue-watching-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 4px 4px;
+    overflow: hidden;
+}
+
+.continue-watching-progress-fill {
+    height: 100%;
+    background-color: #e50914;
+    transition: width 0.3s ease;
+}
+
+.continue-watching-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 4px;
+}
+
+.continue-watching-item:hover .continue-watching-overlay {
+    opacity: 1;
+}
+
+.continue-watching-play-btn {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    color: #000;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.continue-watching-play-btn:hover {
+    background-color: #fff;
+    transform: scale(1.1);
+}
+
+.continue-watching-time {
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
 /* Responsive Design Improvements */
 @media (max-width: 992px) {
     .header {

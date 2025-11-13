@@ -54,8 +54,8 @@ router.post('/auth/register', [
     .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage('Username can only contain letters, numbers, and underscores'),
   body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long'),
+    .isLength({ min: 5 })
+    .withMessage('Password must be at least 5 characters long'),
   body('confirmPassword')
     .custom((value, { req }) => {
       if (value !== req.body.password) {

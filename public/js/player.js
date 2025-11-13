@@ -3,6 +3,9 @@
 // Get URL parameters
 const urlParams = new URLSearchParams(window.location.search);
 const contentId = urlParams.get('contentId');
+const startTime = urlParams.get('startTime');
+const currentSeason = urlParams.get('season') || 1;
+const currentEpisode = urlParams.get('episode') || 1;
 // Try both possible localStorage keys for profile ID
 const profileId = localStorage.getItem('activeProfileId') || localStorage.getItem('selectedProfileId');
 
@@ -35,6 +38,8 @@ let lastSavedTime = 0;
 let controlsTimeout = null;
 let isMouseMoving = false;
 let resumeTime = 0; // Store the time to resume from
+let episodes = []; // Store episodes for series
+let episodeViewingHistory = {}; // Store viewing history for episodes
 
 // Initialize player
 async function initializePlayer() {
@@ -73,6 +78,15 @@ async function initializePlayer() {
         contentTitle.textContent = content.name;
         contentDescription.textContent = content.description;
 
+        // Setup episodes for series
+        if (content.type === 'series') {
+            await setupEpisodes();
+            const episodesBtn = document.getElementById('episodesBtn');
+            if (episodesBtn) {
+                episodesBtn.style.display = 'inline-flex';
+            }
+        }
+
         // Check if video URL exists
         console.log('Video URL:', content.videoUrl);
         if (!content.videoUrl) {
@@ -106,6 +120,12 @@ async function initializePlayer() {
         // Load viewing progress
         console.log('Loading viewing progress...');
         await loadViewingProgress();
+        
+        // If startTime is provided in URL, use it (for continue watching)
+        if (startTime) {
+            resumeTime = parseInt(startTime);
+            lastSavedTime = resumeTime;
+        }
 
         // Setup event listeners
         console.log('Setting up event listeners...');
@@ -220,6 +240,15 @@ function setupEventListeners() {
 
     // Save progress when leaving page
     window.addEventListener('beforeunload', saveViewingProgress);
+
+    // Episodes button (only for series)
+    const episodesBtn = document.getElementById('episodesBtn');
+    if (episodesBtn && content && content.type === 'series') {
+        episodesBtn.addEventListener('click', () => {
+            const drawer = new bootstrap.Offcanvas(document.getElementById('episodesDrawer'));
+            drawer.show();
+        });
+    }
 }
 
 // Video event handlers
@@ -233,6 +262,11 @@ function onLoadedMetadata() {
         videoPlayer.currentTime = resumeTime;
         console.log(`✓ Resumed playback from ${formatTime(resumeTime)}`);
     }
+    
+    // Setup next episode button for series
+    if (content && content.type === 'series') {
+        checkAndShowNextEpisodeButton();
+    }
 }
 
 function onTimeUpdate() {
@@ -244,6 +278,11 @@ function onTimeUpdate() {
 
         // Update time display
         currentTimeDisplay.textContent = formatTime(videoPlayer.currentTime);
+        
+        // Check if we should show next episode button (for series, when >80% complete)
+        if (content && content.type === 'series') {
+            checkAndShowNextEpisodeButton();
+        }
     }
 }
 
@@ -264,6 +303,19 @@ function onEnded() {
     centerPlayBtn.style.display = 'flex';
     centerPlayBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
     saveViewingProgress(); // Save final progress
+    
+    // Auto-advance to next episode for series
+    if (content && content.type === 'series') {
+        const nextEpisode = getNextEpisode();
+        if (nextEpisode) {
+            // Show a prompt or auto-advance after a delay
+            setTimeout(() => {
+                if (confirm('Continue to next episode?')) {
+                    switchToEpisode(nextEpisode.season, nextEpisode.episode);
+                }
+            }, 2000);
+        }
+    }
 }
 
 // Control functions
@@ -400,6 +452,245 @@ function showError(message) {
     errorText.textContent = message;
     errorMessage.style.display = 'flex';
     document.querySelector('.video-wrapper').style.display = 'none';
+}
+
+// Setup episodes for series
+async function setupEpisodes() {
+    if (!content || content.type !== 'series') {
+        return;
+    }
+
+    // Generate episodes
+    const totalEpisodes = content.episodes;
+    const totalSeasons = content.seasons;
+    const episodesPerSeason = Math.ceil(totalEpisodes / totalSeasons);
+
+    episodes = [];
+    for (let season = 1; season <= totalSeasons; season++) {
+        const seasonEpisodes = season === totalSeasons ?
+            totalEpisodes - (episodesPerSeason * (totalSeasons - 1)) :
+            episodesPerSeason;
+
+        for (let ep = 1; ep <= seasonEpisodes; ep++) {
+            const episodeNumber = ((season - 1) * episodesPerSeason) + ep;
+            episodes.push({
+                season: season,
+                episode: ep,
+                episodeNumber: episodeNumber,
+                title: `Episode ${ep}`,
+                description: `Episode ${ep} of Season ${season}`,
+                duration: Math.floor(Math.random() * 20) + 40 + " min",
+                thumbnail: content.image || './_images/posters/default.jpg'
+            });
+        }
+    }
+
+    // Load viewing history for episodes
+    await loadEpisodeViewingHistory();
+
+    // Render episodes in drawer
+    renderEpisodesDrawer();
+}
+
+// Load viewing history for episodes
+async function loadEpisodeViewingHistory() {
+    if (!profileId || !contentId) return;
+
+    try {
+        // For now, we'll use the same contentId for all episodes
+        // In a real system, you'd have separate contentIds for each episode
+        const response = await fetch(`/api/profiles/${profileId}/viewing-history/${contentId}`);
+        if (response.ok) {
+            const result = await response.json();
+            if (result.success && result.data) {
+                // Store viewing history (in a real system, you'd have per-episode history)
+                episodeViewingHistory[`${currentSeason}-${currentEpisode}`] = result.data;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading episode viewing history:', error);
+    }
+}
+
+// Render episodes in drawer
+function renderEpisodesDrawer() {
+    const drawerContent = document.getElementById('episodesDrawerContent');
+    if (!drawerContent) return;
+
+    // Group episodes by season
+    const episodesBySeason = {};
+    episodes.forEach(ep => {
+        if (!episodesBySeason[ep.season]) {
+            episodesBySeason[ep.season] = [];
+        }
+        episodesBySeason[ep.season].push(ep);
+    });
+
+    let html = '';
+    Object.keys(episodesBySeason).sort((a, b) => a - b).forEach(season => {
+        html += `<div class="mb-4">
+            <h6 class="text-white mb-3">Season ${season}</h6>`;
+
+        episodesBySeason[season].forEach(ep => {
+            const historyKey = `${ep.season}-${ep.episode}`;
+            const history = episodeViewingHistory[historyKey];
+            const isCurrentEpisode = parseInt(currentSeason) === ep.season && parseInt(currentEpisode) === ep.episode;
+            const progressPercent = history && history.duration > 0 
+                ? Math.round((history.currentTime / history.duration) * 100)
+                : 0;
+
+            html += `
+                <div class="episode-item-drawer mb-3 p-3 ${isCurrentEpisode ? 'bg-dark border border-danger' : 'bg-secondary bg-opacity-25'} rounded" 
+                     style="cursor: pointer; transition: all 0.2s;">
+                    <div class="d-flex align-items-start">
+                        <div class="episode-thumbnail-drawer me-3" style="min-width: 120px; position: relative;">
+                            <img src="${ep.thumbnail}" alt="${ep.title}" 
+                                 class="w-100 rounded" style="height: 70px; object-fit: cover;">
+                            ${progressPercent > 0 ? `
+                                <div class="progress" style="height: 3px; position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.3);">
+                                    <div class="progress-bar bg-danger" style="width: ${progressPercent}%"></div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div>
+                                    <h6 class="text-white mb-0">${ep.episode}. ${ep.title}</h6>
+                                    <small class="text-muted">${ep.duration}</small>
+                                </div>
+                                ${isCurrentEpisode ? '<span class="badge bg-danger">Playing</span>' : ''}
+                            </div>
+                            <p class="text-muted small mb-2">${ep.description}</p>
+                            ${progressPercent > 0 ? `<small class="text-muted">${progressPercent}% watched</small>` : ''}
+                        </div>
+                        <button class="btn btn-sm btn-outline-light ms-2 play-episode-btn-drawer" 
+                                data-season="${ep.season}" 
+                                data-episode="${ep.episode}">
+                            <i class="bi bi-play-fill"></i>
+                        </button>
+                    </div>
+                </div>`;
+        });
+
+        html += `</div>`;
+    });
+
+    drawerContent.innerHTML = html;
+
+    // Add click handlers for episode items and play buttons
+    drawerContent.querySelectorAll('.episode-item-drawer').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (e.target.closest('.play-episode-btn-drawer')) return;
+            const playBtn = item.querySelector('.play-episode-btn-drawer');
+            if (playBtn) {
+                playBtn.click();
+            }
+        });
+    });
+
+    drawerContent.querySelectorAll('.play-episode-btn-drawer').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const season = btn.getAttribute('data-season');
+            const episode = btn.getAttribute('data-episode');
+            switchToEpisode(season, episode);
+        });
+    });
+}
+
+// Switch to a different episode
+function switchToEpisode(season, episode) {
+    // Close drawer
+    const drawerElement = document.getElementById('episodesDrawer');
+    const drawer = bootstrap.Offcanvas.getInstance(drawerElement);
+    if (drawer) {
+        drawer.hide();
+    }
+
+    // Navigate to the episode
+    const newUrl = `player.html?contentId=${contentId}&season=${season}&episode=${episode}`;
+    window.location.href = newUrl;
+}
+
+// Check and show next episode button
+function checkAndShowNextEpisodeButton() {
+    if (!content || content.type !== 'series' || !videoPlayer.duration) {
+        return;
+    }
+
+    const progress = (videoPlayer.currentTime / videoPlayer.duration) * 100;
+    const nextEpisode = getNextEpisode();
+    
+    // Show button if >80% complete and next episode exists
+    if (progress > 80 && nextEpisode) {
+        showNextEpisodeButton(nextEpisode);
+    } else {
+        hideNextEpisodeButton();
+    }
+}
+
+// Get next episode
+function getNextEpisode() {
+    if (!episodes || episodes.length === 0) return null;
+    
+    const currentEp = episodes.find(ep => 
+        ep.season === parseInt(currentSeason) && ep.episode === parseInt(currentEpisode)
+    );
+    
+    if (!currentEp) return null;
+    
+    // Find next episode in sequence
+    const currentIndex = episodes.findIndex(ep => 
+        ep.season === currentEp.season && ep.episode === currentEp.episode
+    );
+    
+    if (currentIndex >= 0 && currentIndex < episodes.length - 1) {
+        return episodes[currentIndex + 1];
+    }
+    
+    return null;
+}
+
+// Show next episode button
+function showNextEpisodeButton(nextEpisode) {
+    let nextBtn = document.getElementById('nextEpisodeBtn');
+    
+    if (!nextBtn) {
+        // Create button if it doesn't exist
+        nextBtn = document.createElement('button');
+        nextBtn.id = 'nextEpisodeBtn';
+        nextBtn.className = 'control-btn next-episode-btn';
+        nextBtn.title = 'Next Episode';
+        nextBtn.innerHTML = '<i class="bi bi-skip-forward-fill"></i><span class="skip-label">Next</span>';
+        
+        // Insert before fullscreen button
+        const controlsRight = document.querySelector('.controls-right');
+        if (controlsRight) {
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            if (fullscreenBtn) {
+                controlsRight.insertBefore(nextBtn, fullscreenBtn);
+            } else {
+                controlsRight.appendChild(nextBtn);
+            }
+        }
+        
+        // Add click handler
+        nextBtn.addEventListener('click', () => {
+            if (nextEpisode) {
+                switchToEpisode(nextEpisode.season, nextEpisode.episode);
+            }
+        });
+    }
+    
+    nextBtn.style.display = 'inline-flex';
+}
+
+// Hide next episode button
+function hideNextEpisodeButton() {
+    const nextBtn = document.getElementById('nextEpisodeBtn');
+    if (nextBtn) {
+        nextBtn.style.display = 'none';
+    }
 }
 
 // Initialize on page load
