@@ -235,6 +235,134 @@ const getAllContentAdmin = async (req, res) => {
   }
 };
 
+// Update content
+const updateContent = async (req, res) => {
+  try {
+    const { contentId } = req.params;
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: 'Database not available',
+        message: 'Content update requires database connection'
+      });
+    }
+
+    const content = await Content.findOne({ id: parseInt(contentId) });
+    if (!content) {
+      return res.status(404).json({
+        error: 'Content not found'
+      });
+    }
+
+    const {
+      name,
+      year,
+      genre,
+      type,
+      episodes,
+      seasons,
+      duration,
+      description,
+      director,
+      actors,
+      rating
+    } = req.body;
+
+    // Handle file uploads
+    let videoUrl = content.videoUrl; // Keep existing if not updated
+    let imageUrl = content.image; // Keep existing if not updated
+
+    if (req.files) {
+      if (req.files.video && req.files.video[0]) {
+        // Delete old video if exists
+        if (content.videoUrl) {
+          try {
+            const oldVideoPath = path.join(__dirname, '../../public', content.videoUrl);
+            await fs.unlink(oldVideoPath);
+          } catch (error) {
+            console.warn('Could not delete old video:', error.message);
+          }
+        }
+        videoUrl = `/_videos/uploaded/${req.files.video[0].filename}`;
+      }
+
+      if (req.files.thumbnail && req.files.thumbnail[0]) {
+        // Delete old thumbnail if exists and not default
+        if (content.image && !content.image.includes('default-content.svg')) {
+          try {
+            const oldImagePath = path.join(__dirname, '../../public', content.image);
+            await fs.unlink(oldImagePath);
+          } catch (error) {
+            console.warn('Could not delete old thumbnail:', error.message);
+          }
+        }
+        imageUrl = `/_images/uploaded/${req.files.thumbnail[0].filename}`;
+      }
+    }
+
+    // Update content fields
+    if (name) content.name = name.trim();
+    if (year) content.year = parseInt(year);
+    if (genre) content.genre = genre.trim();
+    if (type) content.type = type;
+    if (description) content.description = description.trim();
+    if (director !== undefined) content.director = director ? director.trim() : undefined;
+    if (actors !== undefined) content.actors = actors ? actors.trim() : undefined;
+    if (rating !== undefined) content.rating = rating;
+
+    // Handle type-specific fields
+    if (type === 'series') {
+      if (episodes) content.episodes = parseInt(episodes);
+      if (seasons) content.seasons = parseInt(seasons);
+      content.duration = undefined; // Remove duration if switching to series
+    } else if (type === 'movie') {
+      if (duration) content.duration = duration.trim();
+      content.episodes = undefined; // Remove episodes/seasons if switching to movie
+      content.seasons = undefined;
+    }
+
+    content.image = imageUrl;
+    content.videoUrl = videoUrl;
+
+    const updatedContent = await content.save();
+
+    res.json({
+      success: true,
+      message: 'Content updated successfully',
+      data: updatedContent
+    });
+
+  } catch (error) {
+    console.error('Error updating content:', error);
+
+    // Clean up uploaded files if database save failed
+    if (req.files) {
+      try {
+        if (req.files.video && req.files.video[0]) {
+          await fs.unlink(req.files.video[0].path);
+        }
+        if (req.files.thumbnail && req.files.thumbnail[0]) {
+          await fs.unlink(req.files.thumbnail[0].path);
+        }
+      } catch (cleanupError) {
+        console.error('Error cleaning up files:', cleanupError);
+      }
+    }
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: 'Validation error',
+        details: Object.values(error.errors).map(err => err.message)
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to update content',
+      message: error.message
+    });
+  }
+};
+
 // Delete content
 const deleteContent = async (req, res) => {
   try {
@@ -287,6 +415,7 @@ const deleteContent = async (req, res) => {
 module.exports = {
   uploadFiles,
   createContent,
+  updateContent,
   getAllContentAdmin,
   deleteContent
 };

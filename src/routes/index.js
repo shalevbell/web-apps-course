@@ -266,6 +266,63 @@ router.post('/admin/content', requireAdmin, adminController.uploadFiles, [
     .trim()
 ], validateRequest, adminController.createContent);
 
+// Update content (with file uploads)
+router.put('/admin/content/:contentId', requireAdmin, adminController.uploadFiles, [
+  body('name')
+    .optional()
+    .isLength({ min: 1, max: 200 })
+    .withMessage('Content name must be between 1 and 200 characters')
+    .trim(),
+  body('year')
+    .optional()
+    .isInt({ min: 1900, max: new Date().getFullYear() + 5 })
+    .withMessage('Year must be a valid year'),
+  body('genre')
+    .optional()
+    .isLength({ min: 1, max: 100 })
+    .withMessage('Genre must be less than 100 characters')
+    .trim(),
+  body('type')
+    .optional()
+    .isIn(['movie', 'series'])
+    .withMessage('Type must be either movie or series'),
+  body('description')
+    .optional()
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Description must be between 1 and 1000 characters')
+    .trim(),
+  body('director')
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage('Director name must be less than 100 characters')
+    .trim(),
+  body('actors')
+    .optional()
+    .isLength({ max: 500 })
+    .withMessage('Actors list must be less than 500 characters')
+    .trim(),
+  body('rating')
+    .optional()
+    .isLength({ max: 10 })
+    .withMessage('Rating must be less than 10 characters')
+    .trim(),
+  // Conditional validation for series
+  body('episodes')
+    .if(body('type').equals('series'))
+    .isInt({ min: 1 })
+    .withMessage('Episodes must be a positive number for series'),
+  body('seasons')
+    .if(body('type').equals('series'))
+    .isInt({ min: 1 })
+    .withMessage('Seasons must be a positive number for series'),
+  // Conditional validation for movies
+  body('duration')
+    .if(body('type').equals('movie'))
+    .isLength({ min: 1, max: 20 })
+    .withMessage('Duration must be less than 20 characters')
+    .trim()
+], validateRequest, adminController.updateContent);
+
 // Delete content
 router.delete('/admin/content/:contentId', requireAdmin, adminController.deleteContent);
 
