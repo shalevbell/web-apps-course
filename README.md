@@ -18,7 +18,7 @@ A full-stack Netflix-inspired streaming platform built with vanilla JavaScript, 
 - **Video Player** - HTML5 player with resume/continue watching functionality
 - **Like System** - Like content and see global like counts
 - **Personalized Recommendations** - Based on viewing history and likes
-- **OMDB Integration** - Fetch real-time IMDB, Rotten Tomatoes, and Metascore ratings
+- **OMDB Integration** - Fetch real-time OMDB Metascore ratings
 - **Search & Filters** - Advanced filtering and sorting options
 - **Admin Panel** - Upload and manage content (images & videos)
 - **Responsive Design** - Works on desktop, tablet, and mobile
